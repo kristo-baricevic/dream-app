@@ -5,8 +5,14 @@ import { SetStateAction, useState } from "react";
 import PersonalitySelection from "./PersonalityDropdown";
 import { getPersonality } from "@/utils/parameters/personalities";
 import Image from "next/image";
+import { JournalEntry } from "@/types";
 
-const Question = () => {
+
+type QuestionProps = {
+    entries: JournalEntry[];
+};
+
+const Question: React.FC<QuestionProps> = ({entries}) => {
     const [value, setValue] = useState("Ask the dream doctor a question!");
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState("");
@@ -19,11 +25,13 @@ const Question = () => {
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
-        const answer = await askQuestion(value);
+        const answer = await askQuestion(value, entries);
         setResponse(answer);
         setValue("");
         setLoading(false);
     };
+    
+    
 
     const handleAskQuestion = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
@@ -31,11 +39,10 @@ const Question = () => {
         setIsQuestion(!isQuestion);
         setLoading(false);
     };
-
     const handleSubmitQuestion = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
-        const answer = await askQuestion(value);
+        const answer = await askQuestion(value, entries);
         setResponse(answer);
         setValue("");
         setLoading(false);

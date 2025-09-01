@@ -5,8 +5,6 @@ import EntryCard from './EntryCard';
 import { JournalEntry } from '@/types';
 // import { JournalEntry } from '@prisma/client';
 
-
-
 type DreamCatcherProps = {
   entries: JournalEntry[];
   onDeleteEntry: (id: string) => void;

@@ -28,8 +28,8 @@ const EntryCard = ({entry, href, onDelete}: EntryCardProps ) => {
         entry.analysis
       );
       
-    // const hasAnalysisData = dreamAnalysis && dreamAnalysis.summary && dreamAnalysis.color && dreamAnalysis.subject;
-    
+    // const has"AnalysisData = dreamAnalysis && dreamAnalysis.summary && dreamAnalysis.color && dreamAnalysis.subject;
+    console.log("dreamAnalysis?.color", dreamAnalysis?.color);
     const cloudStyle = { background: lightenColor(dreamAnalysis?.color, 13)};
     
     return (
