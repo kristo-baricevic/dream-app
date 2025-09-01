@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.spinner-overlay {
+    position: fixed;
+    top: 0;         
+    left: 0;         
+    width: 100%;     
+    height: 100%;   
+    background: rgba(255, 255, 255, 0.8); 
+    display: flex;  
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.spinner-overlay img {
+    width: 20px;
+    height: 20px;
+    z-index: 999;
+}
+
+.content-truncate {
+    max-height: 5em; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cloud{ 
+    width:350px;
+    height:120px;
+    box-shadow: 10px 10px rgba(0,0,0,0.2);
+    border-radius:100px;
+    margin-top:20px;
+    margin-bottom: 90px; 
+    position: relative;
+    z-index: 0;
+}
+.cloud::after, 
+.cloud::before{
+    content:"";
+    position:absolute;
+    display:inline-block;
+    background:inherit;
+    border-radius:inherit;
+    z-index: -1;
+}
+.cloud::after{
+    width:100px;
+    height:100px;
+    top:-30px;
+    left:50px;
+}
+.cloud::before{
+    width:180px;
+    height:180px;
+    top: -70px;
+    left:130px;
+}
+
+.cloud:hover{
+    background: rgb(87, 207, 255);
+    opacity: 0.5;
+}
+
+.content {
+    position: relative;
+    padding: 20px;
+    z-index: 1;
+}
+
+.fade-in {
+    opacity: 0;
+    transition: opacity 2s ease-in;
+}
+  
+.fade-in:hover {
+    opacity: 1;
+}
+
+.background-main {
+    /* background-color: #DFDBE5; */
+    background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.035'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.gradient {
+    background: #f4c4f3;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #ffb1fe, #f4c4f3);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #ffb1fe, #f4c4f3); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+@media screen and (max-width: 498px) {
+    .cloud {
+        width:297px;
+        height:102px;
+    }
+    .cloud::after{
+        width:85px;
+        height:85px;
+        top:-25.5px;
+        left:42.5px;
+    }
+    .cloud::before{
+        width:133px;
+        height:133px;
+        top: -59.5px;
+        left:110.5px;
+    }
+}
