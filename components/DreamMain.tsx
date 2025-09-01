@@ -12,8 +12,6 @@ import { getEntries } from '@/services/getEntries';
 import Image from 'next/image';
 import { JournalEntry } from '@/types';
 
-
-
 interface DreamMainProps {
   initialEntries?: JournalEntry[];
 }
@@ -76,7 +74,7 @@ const DreamMain: React.FC<DreamMainProps> = ({ initialEntries = [] }) => {
   return (
     <>
       <div className="mb-4">
-        <Question />
+        <Question entries={entries} />
       </div>
       <div className="flex justify-center" onClick={handleOnClick}>
         <div>

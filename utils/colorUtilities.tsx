@@ -1,5 +1,5 @@
 export function lightenColor(hexColor: string | undefined, percent: number) {
-
+    console.log("hex color in lighten color ", hexColor)
     if(!hexColor){
         hexColor = '#ADD8E6';
     }
@@ -83,7 +83,8 @@ function hslToRgb(h: number, s: number, l: number) {
 
     return [r, g, b];
 }
-
-function rgbToHex(rgb: { toString: (arg0: number) => any; }[]) {
-    return `#${rgb[0].toString(16)}${rgb[1].toString(16)}${rgb[2].toString(16)}`;
+function rgbToHex(rgb: number[]) {
+    const color = `#${rgb[0].toString(16).padStart(2, '0')}${rgb[1].toString(16).padStart(2, '0')}${rgb[2].toString(16).padStart(2, '0')}`
+    console.log("color in rgb to hex ", color);
+    return color;
 }

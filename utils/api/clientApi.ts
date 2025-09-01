@@ -1,3 +1,4 @@
+import { JournalEntry } from "@/types";
 import { EmotionType } from "../parameters/emotions";
 
 export const createURL = (path: string) => {
@@ -52,9 +53,8 @@ export const createNewEntry = async (content: string = "New entry") => {
 
 export const deleteEntry = async (id: string) => {
     try {
-        const url = createURL(`http://localhost:8000/api/entries/${id}/delete/`);
         const res = await fetch(
-            new Request(url, {
+            new Request(`http://localhost:8000/api/entries/${id}/delete/`, {
                 method: 'DELETE',
             })
         );
@@ -74,7 +74,7 @@ export const deleteEntry = async (id: string) => {
 
 
 
-export const askQuestion = async (question: string) => {
+export const askQuestion = async (question: string, entries: JournalEntry[]) => {
     const res = await fetch(
         new Request('http://localhost:8001/qa', {
             method: 'POST',
@@ -83,7 +83,11 @@ export const askQuestion = async (question: string) => {
             },
             body: JSON.stringify({ 
                 question,
-                entries: [] 
+                entries: entries.map(entry => ({
+                    id: entry.id,
+                    created_at: entry.created_at,
+                    content: entry.content
+                }))
             }),
         }),
     );
@@ -91,9 +95,8 @@ export const askQuestion = async (question: string) => {
     if (res.ok) {
         const data = await res.json();
         return data.answer;
-    };
+    }
 };
-
 
 export const generateDream = async (question: string) => {
     const res = await fetch(
