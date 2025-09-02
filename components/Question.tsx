@@ -1,6 +1,6 @@
 "use client";
 
-import { askQuestion } from "@/utils/api/clientApi";
+import { askCustomQuestion, askQuestion } from "@/utils/api/clientApi";
 import { SetStateAction, useState } from "react";
 import PersonalitySelection from "./PersonalityDropdown";
 import { getPersonality } from "@/utils/parameters/personalities";
@@ -42,7 +42,7 @@ const Question: React.FC<QuestionProps> = ({entries}) => {
     const handleSubmitQuestion = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
-        const answer = await askQuestion(value, entries);
+        const answer = await askCustomQuestion(value, entries);
         setResponse(answer);
         setValue("");
         setLoading(false);
