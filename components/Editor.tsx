@@ -226,21 +226,22 @@ const dreamTopics: DreamTopics = {
 const Editor = ({ entry }: any) => {
     const router = useRouter();
 
-    const [value, setValue] = useState(entry.content);
+    const [value, setValue] = useState(entry?.content);
     const [isLoading, setIsLoading] = useState(false);
-    const [analysis, setAnalysis] = useState(entry.analysis || {});
+    const [analysis, setAnalysis] = useState(entry?.analysis || {});
     const [personality, setPersonality] = useState("academic");
     const [mood, setMood] = useState<EmotionType>("Joy"); 
 
 
     const { mood: analysisMood, summary, color, interpretation, subject, negative } = analysis || {};;
-    const analysisData = [
+    const analysisData = analysis && Object.keys(analysis).length > 0 ? [
         { name: 'Summary', value: summary },
         { name: 'Title', value: subject },
         { name: 'Mood', value: analysisMood },
         { name: 'Negative', value: negative ? 'True' : 'False' },
         { name: 'Analysis', value: interpretation },
-    ];
+    ] : [];
+    
     
     const handleSave = async () => {
         try {
@@ -348,22 +349,26 @@ const Editor = ({ entry }: any) => {
                 <div className="mt-5 flex justify-center items-center">
                     <div className="flex">
                         <div className="flex">
-                            <ul className="flex flex-wrap items-center justify-center px-4 py-4 gap-4">
-                                <li>
-                                    <div className="py-12 shadow-lg border-solid border-2 border-black/60 rounded-full" style={{backgroundColor: color || 'white'}}>
-                                        <h2 className="px-3 text-sm text-center">Color Analysis</h2>
-                                    </div>
-                                </li>
-                                {analysisData.map((item) => (
-                                    <li 
-                                        key={item.name || 'Dream a dream!'}
-                                        className="flex flex-col items-center justify-between shadow-lg bg-slate-100 px-4 py-2 rounded-lg border-solid border-2 border-black/60"
-                                    >
-                                        <span className="flex text-lg font-semibold px-2 py-2">{item.name || 'No analysis yet!'}</span>
-                                        <span className="py-2 font-serif max-h-72 overflow-scroll">{item.value || 'No analysis yet!'}</span>
+                            {analysisData.length > 0 ? (
+                                <ul className="flex flex-wrap items-center justify-center px-4 py-4 gap-4">
+                                    <li>
+                                        <div className="py-12 shadow-lg border-solid border-2 border-black/60 rounded-full" style={{backgroundColor: color || 'white'}}>
+                                            <h2 className="px-3 text-sm text-center">Color Analysis</h2>
+                                        </div>
                                     </li>
-                                ))}
-                            </ul>
+                                    {analysisData.map((item) => (
+                                        <li 
+                                            key={item.name}
+                                            className="flex flex-col items-center justify-between shadow-lg bg-slate-100 px-4 py-2 rounded-lg border-solid border-2 border-black/60"
+                                        >
+                                            <span className="flex text-lg font-semibold px-2 py-2">{item.name}</span>
+                                            <span className="py-2 font-serif max-h-72 overflow-scroll">{item.value || 'No analysis yet!'}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-center text-gray-500">No analysis yet! Click **Analyze** above.</p>
+                            )}
                         </div>
                     </div>
                 </div>
