@@ -7,7 +7,7 @@ export const createURL = (path: string) => {
 
 export const updatedEntry = async (id: string, content: string, personality: string, mood: EmotionType) => {
     try {
-        const response = await fetch (new Request(`http://104.236.96.193/api/entries/${id}/update/`, {
+        const response = await fetch (new Request(`https://104.236.96.193/api/entries/${id}/update/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export const updatedEntry = async (id: string, content: string, personality: str
 
 export const createNewEntry = async (content: string = "New entry") => {
     const res = await fetch(
-        new Request('http://104.236.96.193/api/entries/create/', {
+        new Request('https://104.236.96.193/api/entries/create/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const createNewEntry = async (content: string = "New entry") => {
 export const deleteEntry = async (id: string) => {
     try {
         const res = await fetch(
-            new Request(`http://104.236.96.193/api/entries/${id}/delete/`, {
+            new Request(`https://104.236.96.193/api/entries/${id}/delete/`, {
                 method: 'DELETE',
             })
         );
@@ -76,7 +76,7 @@ export const deleteEntry = async (id: string) => {
 
 export const askQuestion = async (question: string, entries: JournalEntry[]) => {
     const res = await fetch(
-        new Request('http://104.236.96.193/qa', {
+        new Request('https://104.236.96.193/qa', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export const askQuestion = async (question: string, entries: JournalEntry[]) => 
 
 export const generateDream = async (question: string) => {
     const res = await fetch(
-        new Request('http://104.236.96.193/generate-dream', {
+        new Request('https://104.236.96.193/generate-dream', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export const generateDream = async (question: string) => {
 
 export const askCustomQuestion = async (question: string, entries: JournalEntry[]) => {
     const res = await fetch(
-        new Request('http://104.236.96.193/custom-question', {
+        new Request('https://104.236.96.193/custom-question', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
