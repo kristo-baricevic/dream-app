@@ -1,5 +1,5 @@
 export const getEntries = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/entries/", {
+    const res = await fetch("https://104.236.96.193/api/entries/", {
       credentials: "include",
     });
     if (!res.ok) throw new Error("Failed to fetch entries");
