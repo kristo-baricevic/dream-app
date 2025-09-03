@@ -43,10 +43,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-
+        {/* 
         <div className="flex flex-col">
           <h3 className="flex flex-col text-white py-2 text-md">Public Login: dreamer.public@gmail.com || testaccount00</h3>
         </div>
+        */}
 
       </div>
     </div>
