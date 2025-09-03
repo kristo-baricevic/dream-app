@@ -45,22 +45,28 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
 
 const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
 
-  const dataForChart = data.map(sentiment_score => sentiment_score);
-  console.log("data from history chart", dataForChart);
   return (
-    <ResponsiveContainer width={"100%"} height={400}>
-      <LineChart width={300} height={100} data={data}>
-        <Line
-          dataKey="sentiment_score"
-          type="monotone"
-          stroke="#8884d8"
-          strokeWidth={2}
-          activeDot={{ r: 8 }}
-        />
-        <XAxis dataKey="created_at" tickFormatter={(tick) => new Date(tick).toLocaleDateString()} />
-        <Tooltip content={<CustomTooltip />} />
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      <div className="flex font-semibold justify-center items-center mb-2">
+        <h1>
+          Sentiment Analysis
+        </h1>
+      </div>
+      <ResponsiveContainer width={"100%"} height={400}>
+        
+        <LineChart width={300} height={100} data={data}>
+          <Line
+            dataKey="sentiment_score"
+            type="monotone"
+            stroke="#8884d8"
+            strokeWidth={2}
+            activeDot={{ r: 8 }}
+          />
+          <XAxis dataKey="created_at" tickFormatter={(tick) => new Date(tick).toLocaleDateString()} />
+          <Tooltip content={<CustomTooltip />} />
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   );
 };
 
