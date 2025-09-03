@@ -5,9 +5,11 @@ export const createURL = (path: string) => {
     return window.location.origin + path;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const updatedEntry = async (id: string, content: string, personality: string, mood: EmotionType) => {
     try {
-        const response = await fetch (new Request(`https://104.236.96.193/api/entries/${id}/update/`, {
+        const response = await fetch(new Request(`${API_URL}/api/entries/${id}/update/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,7 +34,7 @@ export const updatedEntry = async (id: string, content: string, personality: str
 
 export const createNewEntry = async (content: string = "New entry") => {
     const res = await fetch(
-        new Request('https://104.236.96.193/api/entries/create/', {
+        new Request(`${API_URL}/api/entries/create/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -54,7 +56,7 @@ export const createNewEntry = async (content: string = "New entry") => {
 export const deleteEntry = async (id: string) => {
     try {
         const res = await fetch(
-            new Request(`https://104.236.96.193/api/entries/${id}/delete/`, {
+            new Request(`${API_URL}/api/entries/${id}/delete/`, {
                 method: 'DELETE',
             })
         );
@@ -72,16 +74,14 @@ export const deleteEntry = async (id: string) => {
     }
 };
 
-
-
 export const askQuestion = async (question: string, entries: JournalEntry[]) => {
     const res = await fetch(
-        new Request('https://104.236.96.193/qa', {
+        new Request(`${API_URL}/fastapi/qa`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 question,
                 entries: entries.map(entry => ({
                     id: entry.id,
@@ -100,32 +100,32 @@ export const askQuestion = async (question: string, entries: JournalEntry[]) => 
 
 export const generateDream = async (question: string) => {
     const res = await fetch(
-        new Request('https://104.236.96.193/generate-dream', {
+        new Request(`${API_URL}/fastapi/generate-dream`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({theme: question}),
+            body: JSON.stringify({ theme: question }),
         })
     );
 
     if (res.ok) {
         const data = await res.json();
-        console.log("data for dream ", data)
+        console.log("data for dream ", data);
         return data.dream;
     };
 };
 
 export const askCustomQuestion = async (question: string, entries: JournalEntry[]) => {
     const res = await fetch(
-        new Request('https://104.236.96.193/custom-question', {
+        new Request(`${API_URL}/fastapi/custom-question`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 question,
-                entries 
+                entries
             }),
         }),
     );
