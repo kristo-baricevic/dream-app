@@ -1,5 +1,6 @@
 import { JournalEntry } from "@/types";
 import { EmotionType } from "../parameters/emotions";
+import { getPersonality } from "../parameters/personalities";
 
 export const createURL = (path: string) => {
     return window.location.origin + path;
@@ -74,9 +75,11 @@ export const deleteEntry = async (id: string) => {
     }
 };
 
-export const askQuestion = async (question: string, entries: JournalEntry[]) => {
+export const askQuestion = async (question: string, entries: JournalEntry[], personality: string = 'academic') => {
+    const personalityPrompt = getPersonality(personality);
+    
     const res = await fetch(
-        new Request(`${API_URL}/fastapi/qa`, {
+        new Request(`http://localhost:8001/qa`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -87,7 +90,8 @@ export const askQuestion = async (question: string, entries: JournalEntry[]) => 
                     id: entry.id,
                     created_at: entry.created_at,
                     content: entry.content
-                }))
+                })),
+                personality: personalityPrompt  // ← ADD THIS LINE
             }),
         }),
     );
@@ -116,16 +120,19 @@ export const generateDream = async (question: string) => {
     };
 };
 
-export const askCustomQuestion = async (question: string, entries: JournalEntry[]) => {
+export const askCustomQuestion = async (question: string, entries: JournalEntry[],  personality: string = 'academic') => {
+    const personalityPrompt = getPersonality(personality);
+
     const res = await fetch(
-        new Request(`${API_URL}/fastapi/custom-question`, {
+        new Request(`http://localhost:8001/fastapi/custom-question`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 question,
-                entries
+                entries,
+                personality: personalityPrompt 
             }),
         }),
     );

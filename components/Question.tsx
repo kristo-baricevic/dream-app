@@ -17,15 +17,21 @@ const Question: React.FC<QuestionProps> = ({entries}) => {
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState("");
     const [isQuestion, setIsQuestion] = useState(false);
+    const [selectedPersonality, setSelectedPersonality] = useState('academic');
+
 
     const onChange = (e: { target: { value: SetStateAction<string>; }; }) => {
         setValue(e.target.value);
     };
 
+    const handlePersonalitySelect = (personality: string) => {
+        setSelectedPersonality(personality);
+    };
+
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
-        const answer = await askQuestion(value, entries);
+        const answer = await askQuestion(value, entries, selectedPersonality);
         setResponse(answer);
         setValue("");
         setLoading(false);
@@ -39,10 +45,11 @@ const Question: React.FC<QuestionProps> = ({entries}) => {
         setIsQuestion(!isQuestion);
         setLoading(false);
     };
+
     const handleSubmitQuestion = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setLoading(true);
-        const answer = await askCustomQuestion(value, entries);
+        const answer = await askCustomQuestion(value, entries, selectedPersonality);
         setResponse(answer);
         setValue("");
         setLoading(false);
@@ -52,7 +59,7 @@ const Question: React.FC<QuestionProps> = ({entries}) => {
     return (
         <div className="flex flex-col py-4 justify-center align-middle">
             <div className="flex justify-center mb-4">
-                <PersonalitySelection onSelect={getPersonality} />
+                <PersonalitySelection onSelect={handlePersonalitySelect} />
             </div>
             <div className="flex flex-wrap justify-center align-middle">
                 <div className="flex flex-wrap px-2 py-2">
