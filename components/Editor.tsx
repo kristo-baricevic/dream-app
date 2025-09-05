@@ -303,7 +303,7 @@ const Editor = ({ entry }: any) => {
                     <div className="py-4">
                         <form>  
                             <div className="flex flex-col justify-center items-center">                          
-                            <PersonalitySelection onSelect={getPersonality} />
+                            {/* <PersonalitySelection onSelect={getPersonality} /> */}
                             <div className="flex flex-row justify-center items-center">
                             <div className="py-2 px-2">
                                 <button 
