@@ -5,6 +5,8 @@ const links = [
   { href: '/', label: 'Landing Page' },
   { href: '/journal', label: 'Home' },
   { href: '/history', label: 'Charts' },
+  { href: '/about', label: 'About' },
+
 ];
 
 type DashboardLayoutProps<T = {}> = {
