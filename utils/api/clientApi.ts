@@ -79,7 +79,7 @@ export const askQuestion = async (question: string, entries: JournalEntry[], per
     const personalityPrompt = getPersonality(personality);
     
     const res = await fetch(
-        new Request(`http://localhost:8001/qa`, {
+        new Request(`${API_URL}/fastapi/qa`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ export const askCustomQuestion = async (question: string, entries: JournalEntry[
     const personalityPrompt = getPersonality(personality);
 
     const res = await fetch(
-        new Request(`http://localhost:8001/fastapi/custom-question`, {
+        new Request(`${API_URL}/fastapi/custom-question`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
