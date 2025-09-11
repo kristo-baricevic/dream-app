@@ -138,7 +138,7 @@ const journalSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchEntries.fulfilled, (state, action) => {
-        console.log('action payload results', action.payload.results);
+        console.log('action payload results', action.payload);
         state.loading = false;
         state.entries = action.payload.results;
         state.pagination = {
