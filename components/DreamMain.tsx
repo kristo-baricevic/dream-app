@@ -1,105 +1,52 @@
 'use client';
 
-// import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-// import { JournalEntry } from '@prisma/client';
+import { useDispatch, useSelector } from 'react-redux';
+import Image from 'next/image';
+import { AppDispatch } from '@/redux/store';
+import { fetchEntries, deleteEntryThunk, createEntryThunk } from '@/redux/slices/journalSlice';
 import NewEntryCard from '@/components/NewEntryCard';
 import Question from '@/components/Question';
 import DreamCatcher from '@/components/DreamCatcher';
-import { createNewEntry, deleteEntry } from '@/utils/api/clientApi';
-import { getEntries } from '@/services/getEntries';
-import Image from 'next/image';
-import { JournalEntry } from '@/types';
 import Search from './Search';
 import {
   IconLayoutDistributeHorizontalFilled,
   IconLayoutGridFilled,
   IconLayoutListFilled,
 } from '@tabler/icons-react';
+import { RootState } from '@/redux/rootReducer';
 
-interface DreamMainProps {
-  initialEntries?: JournalEntry[];
-}
-
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: JournalEntry[];
-}
-
-const DreamMain: React.FC<DreamMainProps> = ({ initialEntries = [] }) => {
+const DreamMain: React.FC = () => {
   const router = useRouter();
-  const [entries, setEntries] = useState<JournalEntry[]>(initialEntries);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [paginationInfo, setPaginationInfo] = useState({
-    count: 0,
-    next: null,
-    previous: null,
-    hasNext: false,
-    hasPrevious: false,
-  });
+  const { entries, loading, pagination } = useSelector((state: RootState) => state.journal);
+  const [isLoadingNewEntry, setIsLoadingNewEntry] = useState(false);
+
   const userId = 33333;
 
   useEffect(() => {
-    if (isLoaded && !userId) {
-      router.replace('/sign-up');
-    }
-  }, [isLoaded, userId, router]);
-
-  const fetchEntries = async (page = 1, pageSize = 10) => {
-    try {
-      const data = await getEntries();
-      setEntries(data.results);
-
-      // Store pagination info for navigation
-      setPaginationInfo({
-        count: data.count,
-        next: data.next,
-        previous: data.previous,
-        hasNext: !!data.next,
-        hasPrevious: !!data.previous,
-      });
-    } catch (error) {
-      console.error('Failed to fetch entries:', error);
-      setEntries([]);
-    }
-  };
-
-  useEffect(() => {
     if (userId) {
-      try {
-        fetchEntries();
-      } catch (error) {
-        console.error('Failed to fetch entries:', error);
-      }
+      dispatch(fetchEntries());
     }
-  }, [userId]);
+  }, [userId, dispatch]);
 
   const handleOnClick = async () => {
-    setIsLoading(true);
+    setIsLoadingNewEntry(true);
     try {
-      const data = await createNewEntry();
-
-      router.replace(`/journal/${data.id}`);
+      const entry = await dispatch(createEntryThunk()).unwrap();
+      router.replace(`/journal/${entry.id}`);
     } finally {
-      setIsLoading(false);
+      setIsLoadingNewEntry(false);
     }
   };
 
   const handleDeleteEntry = async (id: string) => {
-    setIsLoading(true);
     try {
-      await deleteEntry(id);
-      const updatedEntries = entries.filter((entry) => entry?.id !== id);
-      setEntries(updatedEntries);
+      dispatch(deleteEntryThunk(id));
     } catch (error) {
       console.error('Failed to delete entry:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -111,7 +58,7 @@ const DreamMain: React.FC<DreamMainProps> = ({ initialEntries = [] }) => {
 
       <div className="flex justify-center" onClick={handleOnClick}>
         <div className="flex">
-          {isLoading ? (
+          {isLoadingNewEntry ? (
             <div className="spinner-overlay">
               <Image src="/spinner.gif" alt="Loading..." height="100" width="100" />
             </div>
@@ -120,12 +67,13 @@ const DreamMain: React.FC<DreamMainProps> = ({ initialEntries = [] }) => {
               <NewEntryCard />
             </div>
           )}
-        </div>{' '}
+        </div>
       </div>
 
       <div className="flex justify-center">
         <Search />
       </div>
+
       <div className="flex flex-row gap-2">
         <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
           <IconLayoutDistributeHorizontalFilled />
@@ -133,13 +81,17 @@ const DreamMain: React.FC<DreamMainProps> = ({ initialEntries = [] }) => {
         <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
           <IconLayoutListFilled />
         </div>
-
         <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
           <IconLayoutGridFilled />
         </div>
       </div>
+
       <div className="flex flex-row justify-center py-8">
-        <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} />
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} />
+        )}
       </div>
     </div>
   );
