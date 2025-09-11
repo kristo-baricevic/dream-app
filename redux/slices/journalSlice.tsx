@@ -33,7 +33,7 @@ type SearchParams = Partial<{
   pageSize: number;
 }>;
 
-export const fetchEntries = createAsyncThunk<JournalEntry[], SearchParams>(
+export const fetchEntries = createAsyncThunk<PaginatedResponse, SearchParams>(
   'journal/fetchEntries',
   async (params: SearchParams = {}) => {
     const { page = 1, pageSize = 10, ...filters } = params;
@@ -138,16 +138,16 @@ const journalSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchEntries.fulfilled, (state, action) => {
-        console.log('action payload results', action.payload);
+        console.log('action payload results', action.payload.results);
         state.loading = false;
-        state.entries = action.payload;
-        // state.pagination = {
-        //   count: action.payload.count,
-        //   next: action.payload.next,
-        //   previous: action.payload.previous,
-        //   hasNext: !!action.payload.next,
-        //   hasPrevious: !!action.payload.previous,
-        // };
+        state.entries = action.payload.results;
+        state.pagination = {
+          count: action.payload.count,
+          next: action.payload.next,
+          previous: action.payload.previous,
+          hasNext: !!action.payload.next,
+          hasPrevious: !!action.payload.previous,
+        };
         console.log('state entries ', state.entries);
       })
       .addCase(fetchEntries.rejected, (state, action) => {
