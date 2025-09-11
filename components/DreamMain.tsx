@@ -16,6 +16,7 @@ import {
   IconLayoutListFilled,
 } from '@tabler/icons-react';
 import { RootState } from '@/redux/rootReducer';
+import MainHeader from './MainHeader';
 
 const DreamMain: React.FC = () => {
   const router = useRouter();
@@ -53,62 +54,22 @@ const DreamMain: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="flex justify-center mb-4">
-        <Question entries={entries} />
-      </div>
-
-      <div className="flex justify-center" onClick={handleOnClick}>
-        <div className="flex">
-          {isLoadingNewEntry ? (
-            <div className="spinner-overlay">
-              <Image src="/spinner.gif" alt="Loading..." height="100" width="100" />
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <NewEntryCard />
-            </div>
-          )}
+      <>
+        <div className="flex justify-center mb-4">
+          <Question entries={entries} />
         </div>
-      </div>
 
-      <div className="flex justify-center">
-        <Search />
-      </div>
+        <MainHeader
+          layout={layout}
+          setLayout={setLayout}
+          handleOnClick={handleOnClick}
+          isLoadingNewEntry={isLoadingNewEntry}
+        />
 
-      <div className="flex flex-row gap-2">
-        <div
-          className={`flex p-2 rounded-full cursor-pointer ${
-            layout === 'horizontal' ? 'bg-slate-200' : 'bg-slate-50'
-          }`}
-          onClick={() => setLayout('horizontal')}
-        >
-          <IconLayoutDistributeHorizontalFilled />
-        </div>
-        <div
-          className={`flex p-2 rounded-full cursor-pointer ${
-            layout === 'list' ? 'bg-slate-200' : 'bg-slate-50'
-          }`}
-          onClick={() => setLayout('list')}
-        >
-          <IconLayoutListFilled />
-        </div>
-        <div
-          className={`flex p-2 rounded-full cursor-pointer ${
-            layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
-          }`}
-          onClick={() => setLayout('grid')}
-        >
-          <IconLayoutGridFilled />
-        </div>
-      </div>
-
-      <div className="flex flex-row justify-center py-8">
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
+        <div className="flex flex-row justify-center py-8 mt-8">
           <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} layout={layout} />
-        )}
-      </div>
+        </div>
+      </>
     </div>
   );
 };
