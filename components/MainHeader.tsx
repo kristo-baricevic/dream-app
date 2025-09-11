@@ -41,12 +41,7 @@ const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'moods', 'analy
 const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: MainHeaderProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const [toggleSearch, setToggleSearch] = useState(false);
-  const [activeSearchFields, setActiveSearchFields] = useState<DreamSearch>({
-    entries: '',
-    title: '',
-    moods: '',
-    analysis: '',
-  });
+
   const searchParams = useSelector((state: RootState) => state.journal.searchParams);
 
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -70,13 +65,13 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
         {!toggleSearch ? (
           <div
             onClick={() => setToggleSearch(true)}
-            className="px-2 bg-slate-50 text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
+            className="px-2 bg-slate-50 shadow-md text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
           >
             Search
           </div>
         ) : (
           <div
-            className="px-2 bg-slate-50 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24"
+            className="px-2 bg-slate-100 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24"
             onClick={() => setToggleSearch(false)}
           >
             Close
@@ -104,7 +99,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
         {/* Right → Layout icons */}
         <div className="flex flex-row gap-2">
           <div
-            className={`flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
+            className={`shadow-md flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
               layout === 'horizontal' ? 'bg-slate-200' : 'bg-slate-50'
             }`}
             onClick={() => setLayout('horizontal')}
@@ -112,7 +107,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
             <IconLayoutDistributeHorizontalFilled className="w-6 h-6" />
           </div>
           <div
-            className={`flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
+            className={`shadow-md flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
               layout === 'list' ? 'bg-slate-200' : 'bg-slate-50'
             }`}
             onClick={() => setLayout('list')}
@@ -121,7 +116,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
           </div>
           {!isMobile && (
             <div
-              className={`flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
+              className={`shadow-md flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
                 layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
               }`}
               onClick={() => setLayout('grid')}
@@ -136,7 +131,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
       <AnimatePresence>
         {toggleSearch && (
           <motion.div
-            className="flex flex-wrap justify-center gap-6"
+            className="flex flex-wrap justify-center gap-6 mt-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
