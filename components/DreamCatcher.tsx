@@ -16,6 +16,8 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  console.log('entries log', entries);
+
   if (!entries || entries.length === 0) {
     return (
       <div className="flex justify-center p-8">
