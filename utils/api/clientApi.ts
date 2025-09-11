@@ -6,7 +6,7 @@ export const createURL = (path: string) => {
   return window.location.origin + path;
 };
 
-const local = true;
+const local = false;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
