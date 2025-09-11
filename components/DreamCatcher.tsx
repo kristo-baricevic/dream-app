@@ -5,6 +5,7 @@ import Link from 'next/link';
 import EntryCard from './EntryCard';
 import { JournalEntry } from '@/types';
 import ExpandedEntryCard from './ExpandedEntryCard';
+import useIsMobile from '@/utils/useIsMobile';
 
 type DreamCatcherProps = {
   entries: JournalEntry[];
@@ -12,11 +13,38 @@ type DreamCatcherProps = {
   layout: string;
 };
 
+const initAnalysis = {
+  id: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  entryId: '',
+  userId: '',
+  mood: '',
+  summary: '',
+  color: '',
+  interpretation: '',
+  negative: false,
+  subject: '',
+  sentimentScore: 0,
+};
+
 const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, layout }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
-  console.log('entries log', entries);
+  const isMobile = useIsMobile();
 
   if (!entries || entries.length === 0) {
     return (
@@ -35,20 +63,9 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
             entry={entry}
             onDelete={onDeleteEntry}
             href={`/journal/${entry.id}`}
-            analysis={{
-              id: '',
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              entryId: '',
-              userId: '',
-              mood: '',
-              summary: '',
-              color: '',
-              interpretation: '',
-              negative: false,
-              subject: '',
-              sentimentScore: 0,
-            }}
+            isExpanded={expandedIds.has(entry.id)}
+            onToggleExpand={() => toggleExpand(entry.id)}
+            analysis={initAnalysis}
           />
         ))}
       </div>
@@ -59,25 +76,14 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
     return (
       <div className="flex flex-wrap gap-4 p-4 justify-center">
         {entries.map((entry) => (
-          <EntryCard
+          <ExpandedEntryCard
             key={entry.id}
             entry={entry}
             onDelete={onDeleteEntry}
             href={`/journal/${entry.id}`}
-            analysis={{
-              id: '',
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              entryId: '',
-              userId: '',
-              mood: '',
-              summary: '',
-              color: '',
-              interpretation: '',
-              negative: false,
-              subject: '',
-              sentimentScore: 0,
-            }}
+            isExpanded={expandedIds.has(entry.id)}
+            onToggleExpand={() => toggleExpand(entry.id)}
+            analysis={initAnalysis}
           />
         ))}
       </div>
@@ -123,7 +129,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
   const displayItems = getDisplayItems();
 
   return (
-    <div className="flex justify-center items-center p-4 gap-8 min-h-[400px]">
+    <div className="flex justify-center items-center p-4 gap-8 min-h-[400px] mt-6">
       {/* Left Arrow */}
       {entries.length > 1 && (
         <button
@@ -150,69 +156,57 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
       {/* Entries */}
       <div className="flex justify-center items-center gap-4">
-        {displayItems.map(({ entry, position, index }) => (
-          <div
-            key={`${entry.id}-${position}`}
-            className={`transition-all duration-300 ease-in-out ${
-              position === 'current'
-                ? 'scale-110 z-10 transform'
-                : 'scale-75 opacity-70 hover:opacity-90 cursor-pointer'
-            }`}
-            onClick={() => {
-              if (position !== 'current') {
-                handleItemClick(index, position);
-              }
-            }}
-          >
-            {position === 'current' ? (
-              <div className="transition-transform hover:scale-105">
-                <ExpandedEntryCard
-                  entry={entry}
-                  onDelete={onDeleteEntry}
-                  href={`/journal/${entry.id}`}
-                  isExpanded={isExpanded}
-                  onToggleExpand={() => setIsExpanded(!isExpanded)}
-                  analysis={{
-                    id: '',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    entryId: '',
-                    userId: '',
-                    mood: '',
-                    summary: '',
-                    color: '',
-                    interpretation: '',
-                    negative: false,
-                    subject: '',
-                    sentimentScore: 0,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="transition-transform hover:scale-105">
-                <EntryCard
-                  entry={entry}
-                  onDelete={onDeleteEntry}
-                  href={`/journal/${entry.id}`}
-                  analysis={{
-                    id: '',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    entryId: '',
-                    userId: '',
-                    mood: '',
-                    summary: '',
-                    color: '',
-                    interpretation: '',
-                    negative: false,
-                    subject: '',
-                    sentimentScore: 0,
-                  }}
-                />
-              </div>
-            )}
+        {isMobile ? (
+          <div className="w-full">
+            <ExpandedEntryCard
+              key={entries[currentIndex].id}
+              entry={entries[currentIndex]}
+              onDelete={onDeleteEntry}
+              href={`/journal/${entries[currentIndex].id}`}
+              isExpanded={isExpanded}
+              onToggleExpand={() => setIsExpanded(!isExpanded)}
+              analysis={initAnalysis}
+            />
           </div>
-        ))}
+        ) : (
+          displayItems.map(({ entry, position, index }) => (
+            <div
+              key={`${entry.id}-${position}`}
+              className={`transition-all duration-300 ease-in-out ${
+                position === 'current'
+                  ? 'scale-110 z-10 transform'
+                  : 'scale-75 opacity-70 hover:opacity-90 cursor-pointer'
+              }`}
+              onClick={() => {
+                if (position !== 'current') {
+                  handleItemClick(index, position);
+                }
+              }}
+            >
+              {position === 'current' ? (
+                <div className="transition-transform hover:scale-105">
+                  <ExpandedEntryCard
+                    entry={entry}
+                    onDelete={onDeleteEntry}
+                    href={`/journal/${entry.id}`}
+                    isExpanded={isExpanded}
+                    onToggleExpand={() => setIsExpanded(!isExpanded)}
+                    analysis={initAnalysis}
+                  />
+                </div>
+              ) : (
+                <div className="transition-transform hover:scale-105">
+                  <EntryCard
+                    entry={entry}
+                    onDelete={onDeleteEntry}
+                    href={`/journal/${entry.id}`}
+                    analysis={initAnalysis}
+                  />
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Right Arrow */}

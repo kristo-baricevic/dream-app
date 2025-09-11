@@ -22,6 +22,7 @@ type JournalState = {
   };
   loading: boolean;
   error: string | null;
+  searchParams: SearchParams;
 };
 
 type SearchParams = Partial<{
@@ -29,6 +30,8 @@ type SearchParams = Partial<{
   title: string;
   moods: string;
   analysis: string;
+  start_date: string;
+  end_date: string;
   page: number;
   pageSize: number;
 }>;
@@ -112,6 +115,7 @@ const initialState: JournalState = {
   },
   loading: false,
   error: null,
+  searchParams: {},
 };
 
 const journalSlice = createSlice({
@@ -130,6 +134,15 @@ const journalSlice = createSlice({
     deleteEntry: (state, action: PayloadAction<string>) => {
       state.entries = state.entries.filter((e) => e.id !== action.payload);
     },
+    setSearchParams: (state, action: PayloadAction<Partial<SearchParams>>) => {
+      state.searchParams = {
+        ...state.searchParams,
+        ...action.payload,
+      };
+    },
+    clearSearchParams: (state) => {
+      state.searchParams = {};
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -138,7 +151,6 @@ const journalSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchEntries.fulfilled, (state, action) => {
-        console.log('action payload results', action.payload.results);
         state.loading = false;
         state.entries = action.payload.results;
         state.pagination = {
@@ -148,7 +160,6 @@ const journalSlice = createSlice({
           hasNext: !!action.payload.next,
           hasPrevious: !!action.payload.previous,
         };
-        console.log('state entries ', state.entries);
       })
       .addCase(fetchEntries.rejected, (state, action) => {
         state.loading = false;
@@ -161,7 +172,7 @@ const journalSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(createEntryThunk.fulfilled, (state, action) => {
-        state.entries.unshift(action.payload); // add new entry at the top
+        state.entries.unshift(action.payload);
         state.pagination.count += 1;
       })
       .addCase(createEntryThunk.rejected, (state, action) => {
@@ -170,5 +181,6 @@ const journalSlice = createSlice({
   },
 });
 
-export const { addEntry, updateEntry, deleteEntry } = journalSlice.actions;
+export const { addEntry, updateEntry, deleteEntry, setSearchParams, clearSearchParams } =
+  journalSlice.actions;
 export default journalSlice.reducer;

@@ -14,10 +14,13 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Search from './Search';
 import NewEntryCard from './NewEntryCard';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { fetchEntries } from '@/redux/slices/journalSlice';
+import { fetchEntries, setSearchParams } from '@/redux/slices/journalSlice';
 import { AnimatePresence, motion } from 'framer-motion';
+import useIsMobile from '@/utils/useIsMobile';
+import { DateRangePickerDisabledAfterTodayExample } from './DateRangePickerDisabledAfterTodayExample';
+import { RootState } from '@/redux/rootReducer';
 
 type MainHeaderProps = {
   layout: string;
@@ -44,18 +47,20 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
     moods: '',
     analysis: '',
   });
+  const searchParams = useSelector((state: RootState) => state.journal.searchParams);
 
   const [hasInteracted, setHasInteracted] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!toggleSearch || !hasInteracted) return;
 
     const handler = setTimeout(() => {
-      dispatch(fetchEntries(activeSearchFields));
+      dispatch(fetchEntries(searchParams));
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [activeSearchFields, dispatch, toggleSearch, hasInteracted]);
+  }, [searchParams, dispatch, toggleSearch, hasInteracted]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -77,6 +82,11 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
             Close
           </div>
         )}
+
+        {/* Date Picker */}
+        <div className="cursor-pointer">
+          <DateRangePickerDisabledAfterTodayExample />
+        </div>
 
         {/* Center → New Entry */}
         <div onClick={handleOnClick} className="cursor-pointer">
@@ -109,14 +119,16 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
           >
             <IconLayoutListFilled className="w-6 h-6" />
           </div>
-          <div
-            className={`flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
-              layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
-            }`}
-            onClick={() => setLayout('grid')}
-          >
-            <IconLayoutGridFilled className="w-6 h-6" />
-          </div>
+          {!isMobile && (
+            <div
+              className={`flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
+                layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
+              }`}
+              onClick={() => setLayout('grid')}
+            >
+              <IconLayoutGridFilled className="w-6 h-6" />
+            </div>
+          )}
         </div>
       </div>
 
@@ -137,13 +149,10 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
                 </label>
                 <input
                   className="rounded-lg bg-gray-200 px-2 border border-gray-300 h-10"
-                  value={activeSearchFields[field]}
+                  value={searchParams[field] || ''}
                   onChange={(e) => {
                     setHasInteracted(true);
-                    setActiveSearchFields((prev) => ({
-                      ...prev,
-                      [field]: e.target.value,
-                    }));
+                    dispatch(setSearchParams({ [field]: e.target.value }));
                   }}
                 />
               </div>
