@@ -26,6 +26,8 @@ const DreamMain: React.FC = () => {
   const [isLoadingNewEntry, setIsLoadingNewEntry] = useState(false);
   const [layout, setLayout] = useState<string>('horizontal');
 
+  console.log('entries from Dream Main ', entries);
+
   const userId = 33333;
 
   useEffect(() => {
