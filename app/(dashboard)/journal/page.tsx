@@ -38,7 +38,7 @@ export default function JournalPage() {
   return (
     <div className="px-10">
       <div className="flex flex-col">
-        <DreamMain initialEntries={entries} />
+        <DreamMain />
       </div>
     </div>
   );
