@@ -11,8 +11,15 @@ const PersonalitySelection = ({ onSelect }: { onSelect: (personality: string) =>
 
   return (
     <div className="flex flex-col justify-center">
-      <label htmlFor="personality" className="py-2">Choose your dream doctor&apos;s philosophy:  </label>
-      <select id="personality" value={selectedPersonality} onChange={handleSelection} className="rounded-lg p-2 shadow-lg">
+      <label htmlFor="personality" className="py-2">
+        Choose your dream doctor&apos;s philosophy:{' '}
+      </label>
+      <select
+        id="personality"
+        value={selectedPersonality}
+        onChange={handleSelection}
+        className="rounded-lg p-2 shadow-lg"
+      >
         <option value="academic">Academic</option>
         <option value="mystical">Mystical</option>
         <option value="scientific">Scientific</option>

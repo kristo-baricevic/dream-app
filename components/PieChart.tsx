@@ -27,14 +27,7 @@ const PieChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
       <div className="flex flex-col text-center">
         <h1 className="flex justify-center text-center">Dreams by Color Analysis</h1>
         <PieChart width={450} height={250}>
-          <Pie
-            dataKey="value"
-            data={colorData}
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-          >
+          <Pie dataKey="value" data={colorData} nameKey="name" cx="50%" cy="50%" outerRadius={100}>
             {colorData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />
             ))}

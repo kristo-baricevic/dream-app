@@ -25,7 +25,13 @@ const RadarChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
         <PolarGrid />
         <PolarAngleAxis dataKey="mood" />
         <PolarRadiusAxis angle={30} domain={[0, maxCount]} />
-        <Radar name="Dreams Per Mood" dataKey="count" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+        <Radar
+          name="Dreams Per Mood"
+          dataKey="count"
+          stroke="#8884d8"
+          fill="#8884d8"
+          fillOpacity={0.6}
+        />
         <Legend />
       </RadarChart>
     </div>

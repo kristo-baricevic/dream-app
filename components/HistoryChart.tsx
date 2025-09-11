@@ -5,7 +5,7 @@ import { ResponsiveContainer, Line, XAxis, Tooltip, LineChart, TooltipProps } fr
 
 type AnalysisData = {
   sentiment_score: number;
-  created_at: Date; 
+  created_at: Date;
   mood: string;
   color: string;
 };
@@ -17,10 +17,9 @@ interface CustomTooltipProps {
 }
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
-
   if (active && payload && payload.length) {
     const data = payload[0].payload as AnalysisData;
-    const formattedDate = new Date(label ?? "").toLocaleString("en-us", {
+    const formattedDate = new Date(label ?? '').toLocaleString('en-us', {
       weekday: 'long',
       year: 'numeric',
       month: 'short',
@@ -44,16 +43,12 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
 };
 
 const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
-
   return (
     <>
       <div className="flex font-semibold justify-center items-center mb-2">
-        <h1>
-          Sentiment Analysis
-        </h1>
+        <h1>Sentiment Analysis</h1>
       </div>
-      <ResponsiveContainer width={"100%"} height={400}>
-        
+      <ResponsiveContainer width={'100%'} height={400}>
         <LineChart width={300} height={100} data={data}>
           <Line
             dataKey="sentiment_score"
@@ -62,7 +57,10 @@ const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
             strokeWidth={2}
             activeDot={{ r: 8 }}
           />
-          <XAxis dataKey="created_at" tickFormatter={(tick) => new Date(tick).toLocaleDateString()} />
+          <XAxis
+            dataKey="created_at"
+            tickFormatter={(tick) => new Date(tick).toLocaleDateString()}
+          />
           <Tooltip content={<CustomTooltip />} />
         </LineChart>
       </ResponsiveContainer>

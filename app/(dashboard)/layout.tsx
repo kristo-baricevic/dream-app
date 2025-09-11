@@ -1,12 +1,11 @@
 // import { UserButton } from "@clerk/nextjs";
-import Link from "next/link";
+import Link from 'next/link';
 
 const links = [
   { href: '/', label: 'Landing Page' },
   { href: '/journal', label: 'Home' },
   { href: '/history', label: 'Charts' },
   { href: '/about', label: 'About' },
-
 ];
 
 type DashboardLayoutProps<T = {}> = {
@@ -31,9 +30,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </ul>
       </nav>
-      <main className="max-w-screen-xl mx-auto p-2">
-        {children}
-      </main>
+      <main className="max-w-screen-xl mx-auto p-2">{children}</main>
     </div>
   );
 };
