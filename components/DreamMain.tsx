@@ -23,12 +23,13 @@ const DreamMain: React.FC = () => {
 
   const { entries, loading, pagination } = useSelector((state: RootState) => state.journal);
   const [isLoadingNewEntry, setIsLoadingNewEntry] = useState(false);
+  const [layout, setLayout] = useState<string>('horizontal');
 
   const userId = 33333;
 
   useEffect(() => {
     if (userId) {
-      dispatch(fetchEntries());
+      dispatch(fetchEntries({}));
     }
   }, [userId, dispatch]);
 
@@ -75,13 +76,28 @@ const DreamMain: React.FC = () => {
       </div>
 
       <div className="flex flex-row gap-2">
-        <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
+        <div
+          className={`flex p-2 rounded-full cursor-pointer ${
+            layout === 'horizontal' ? 'bg-slate-200' : 'bg-slate-50'
+          }`}
+          onClick={() => setLayout('horizontal')}
+        >
           <IconLayoutDistributeHorizontalFilled />
         </div>
-        <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
+        <div
+          className={`flex p-2 rounded-full cursor-pointer ${
+            layout === 'list' ? 'bg-slate-200' : 'bg-slate-50'
+          }`}
+          onClick={() => setLayout('list')}
+        >
           <IconLayoutListFilled />
         </div>
-        <div className="flex bg-slate-50 p-2 rounded-full cursor-pointer">
+        <div
+          className={`flex p-2 rounded-full cursor-pointer ${
+            layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
+          }`}
+          onClick={() => setLayout('grid')}
+        >
           <IconLayoutGridFilled />
         </div>
       </div>
@@ -90,7 +106,7 @@ const DreamMain: React.FC = () => {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} />
+          <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} layout={layout} />
         )}
       </div>
     </div>

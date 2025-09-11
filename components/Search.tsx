@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-
-type SearchProps = {};
+import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchEntries } from '@/redux/slices/journalSlice';
+import type { AppDispatch } from '@/redux/store';
 
 type DreamSearch = {
   entries: string;
@@ -13,8 +14,9 @@ type DreamSearch = {
 
 const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'moods', 'analysis'];
 
-const Search: React.FC<SearchProps> = () => {
-  const [toggleSearch, setToggleSearch] = useState<Boolean>(false);
+const Search: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const [toggleSearch, setToggleSearch] = useState(false);
   const [activeSearchFields, setActiveSearchFields] = useState<DreamSearch>({
     entries: '',
     title: '',
@@ -22,14 +24,21 @@ const Search: React.FC<SearchProps> = () => {
     analysis: '',
   });
 
+  // 🔹 Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      dispatch(fetchEntries(activeSearchFields));
+    }, 500); // wait 500ms after last change
+
+    return () => clearTimeout(handler); // cleanup on re-type
+  }, [activeSearchFields, dispatch]);
+
   return (
     <>
       {!toggleSearch ? (
         <div>
           <div
-            onClick={() => {
-              setToggleSearch(true);
-            }}
+            onClick={() => setToggleSearch(true)}
             className="px-2 bg-slate-50 text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
           >
             Search
@@ -39,9 +48,7 @@ const Search: React.FC<SearchProps> = () => {
         <div className="flex justify-center mb-24 space-x-6">
           <div
             className="px-2 bg-slate-50 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer"
-            onClick={() => {
-              setToggleSearch(false);
-            }}
+            onClick={() => setToggleSearch(false)}
           >
             Close
           </div>

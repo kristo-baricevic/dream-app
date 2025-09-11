@@ -9,9 +9,10 @@ import ExpandedEntryCard from './ExpandedEntryCard';
 type DreamCatcherProps = {
   entries: JournalEntry[];
   onDeleteEntry: (id: string) => void;
+  layout: string;
 };
 
-const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry }) => {
+const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, layout }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -19,6 +20,64 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry }) =
     return (
       <div className="flex justify-center p-8">
         <p className="text-gray-500">No entries to display</p>
+      </div>
+    );
+  }
+
+  if (layout === 'list') {
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        {entries.map((entry) => (
+          <ExpandedEntryCard
+            key={entry.id}
+            entry={entry}
+            onDelete={onDeleteEntry}
+            href={`/journal/${entry.id}`}
+            analysis={{
+              id: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              entryId: '',
+              userId: '',
+              mood: '',
+              summary: '',
+              color: '',
+              interpretation: '',
+              negative: false,
+              subject: '',
+              sentimentScore: 0,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === 'grid') {
+    return (
+      <div className="flex flex-wrap gap-4 p-4 justify-center">
+        {entries.map((entry) => (
+          <EntryCard
+            key={entry.id}
+            entry={entry}
+            onDelete={onDeleteEntry}
+            href={`/journal/${entry.id}`}
+            analysis={{
+              id: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              entryId: '',
+              userId: '',
+              mood: '',
+              summary: '',
+              color: '',
+              interpretation: '',
+              negative: false,
+              subject: '',
+              sentimentScore: 0,
+            }}
+          />
+        ))}
       </div>
     );
   }

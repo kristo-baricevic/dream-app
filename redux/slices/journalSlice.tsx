@@ -11,16 +11,48 @@ type PaginatedResponse = {
   results: JournalEntry[];
 };
 
-export const fetchEntries = createAsyncThunk<
-  PaginatedResponse,
-  { page?: number; pageSize?: number } | void
->('journal/fetchEntries', async ({ page = 1, pageSize = 10 } = {}) => {
-  const res = await fetch(`${API_URL}/api/entries/?page=${page}&page_size=${pageSize}`, {
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('Failed to fetch entries');
-  return res.json();
-});
+type JournalState = {
+  entries: JournalEntry[];
+  pagination: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
+  loading: boolean;
+  error: string | null;
+};
+
+type SearchParams = Partial<{
+  entries: string;
+  title: string;
+  moods: string;
+  analysis: string;
+  page: number;
+  pageSize: number;
+}>;
+
+export const fetchEntries = createAsyncThunk<PaginatedResponse, SearchParams>(
+  'journal/fetchEntries',
+  async (params: SearchParams = {}) => {
+    const { page = 1, pageSize = 10, ...filters } = params;
+
+    const query = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([_, v]) => v !== undefined && v !== '')
+      ),
+    });
+
+    const res = await fetch(`${API_URL}/api/entries/?${query.toString()}`, {
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch entries');
+    return res.json();
+  }
+);
 
 export const deleteEntryThunk = createAsyncThunk<string, string>(
   'journal/deleteEntry',
@@ -68,19 +100,6 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
     }
   }
 );
-
-type JournalState = {
-  entries: JournalEntry[];
-  pagination: {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    hasNext: boolean;
-    hasPrevious: boolean;
-  };
-  loading: boolean;
-  error: string | null;
-};
 
 const initialState: JournalState = {
   entries: [],
