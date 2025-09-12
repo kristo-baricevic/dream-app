@@ -3,18 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Image from 'next/image';
 import { AppDispatch } from '@/redux/store';
 import { fetchEntries, deleteEntryThunk, createEntryThunk } from '@/redux/slices/journalSlice';
-import NewEntryCard from '@/components/NewEntryCard';
 import Question from '@/components/Question';
 import DreamCatcher from '@/components/DreamCatcher';
-import Search from './Search';
-import {
-  IconLayoutDistributeHorizontalFilled,
-  IconLayoutGridFilled,
-  IconLayoutListFilled,
-} from '@tabler/icons-react';
 import { RootState } from '@/redux/rootReducer';
 import MainHeader from './MainHeader';
 

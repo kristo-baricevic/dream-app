@@ -56,6 +56,7 @@ const ExpandedEntryCard = ({
 
   const date = new Date(entry.created_at).toDateString();
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
+  const [viewType, setViewType] = useState<string>('entry');
 
   const [dreamAnalysis, setAnalysis] = useState<Partial<AnalysisData> | undefined>(entry.analysis);
   const isMobile = useIsMobile();
@@ -74,24 +75,55 @@ const ExpandedEntryCard = ({
           <div className="px-4 content-truncate font-bold">{dreamAnalysis?.subject}</div>
           {isExpanded && showContent ? (
             <div className="mt-4 mr-4 px-4 max-h-[270px] overflow-y-auto space-y-2">
-              <div className="font-serif transition-opacity duration-300">
-                <span className="font-bold">Summary:</span> {dreamAnalysis?.summary}
-              </div>
-              <div className="font-serif transition-opacity duration-300">
-                <span className="font-bold">Mood: </span>
-                {dreamAnalysis?.mood}
-              </div>
-              <div className="font-serif transition-opacity duration-300">
-                <span className="font-bold">Analysis: </span>
-                {formatAnalysis(dreamAnalysis?.interpretation as string)}
-              </div>
+              {viewType === 'analysis' ? (
+                <>
+                  <div className="font-serif transition-opacity duration-300">
+                    <span className="font-bold">Summary:</span> {dreamAnalysis?.summary}
+                  </div>
+                  <div className="font-serif transition-opacity duration-300">
+                    <span className="font-bold">Mood: </span>
+                    {dreamAnalysis?.mood}
+                  </div>
+                  <div className="font-serif transition-opacity duration-300">
+                    <span className="font-bold">Analysis: </span>
+                    {formatAnalysis(dreamAnalysis?.interpretation as string)}
+                  </div>
+                </>
+              ) : (
+                <div className="font-serif transition-opacity duration-300">{entry?.content}</div>
+              )}
             </div>
-          ) : (
+          ) : viewType === 'analysis' ? (
             <div className="px-4 content-truncate font-serif">{dreamAnalysis?.summary}</div>
+          ) : (
+            <div className="px-4 content-truncate font-serif">{entry?.content}</div>
           )}
         </div>
 
         <div className={`flex justify-end mr-12 ${isExpanded ? 'mt-6' : ''} gap-2`}>
+          <div
+            className="cursor-pointer mr-2"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              setViewType('entry');
+            }}
+          >
+            <span className={`${viewType === 'entry' ? 'underline' : ''} text-sm`}>Entry</span>
+          </div>
+          <div
+            className="cursor-pointer mr-2"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              setViewType('analysis');
+            }}
+          >
+            <span className={`${viewType === 'analysis' ? 'underline' : ''} text-sm`}>
+              Analysis
+            </span>
+          </div>
+
           <div
             onClick={(e) => {
               e.stopPropagation();

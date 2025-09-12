@@ -2,7 +2,6 @@ import gsap from 'gsap';
 
 // Utility function to create and animate the shooting star
 export function createShootingStar() {
-  console.log('animating...');
   // Create shooting star element
   const shootingStar = document.createElement('div');
   shootingStar.id = 'shooting-star';
