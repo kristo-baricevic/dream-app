@@ -164,7 +164,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
       )}
 
       {/* Entries */}
-      <div className="flex justify-center items-center gap-4">
+      <div className={`flex justify-center items-center gap-4 ${isExpanded ? 'mt-6' : ''} `}>
         {isSmallScreen ? (
           <div
             className="w-full"
