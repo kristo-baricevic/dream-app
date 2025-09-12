@@ -26,8 +26,8 @@ export default function Home() {
         height: '100vh',
       }}
     >
-      <div className="flex flex-col">
-        <div className="flex flex-col bg-white/60 py-10 shadow-xl rounded-xl">
+      <div className="flex flex-col justify-center items-center px-8">
+        <div className="flex flex-col justify-center items-center bg-white/60 py-10 shadow-xl rounded-xl">
           <div className="flex flex-col px-10 w-full max-w-[600px] mx-auto">
             <h1 className="flex flex-col text-6xl text-black mb-4">Dream Journal</h1>
             <p className="flex flex-col text-xl text-black mb-4">Explore your dreams!</p>

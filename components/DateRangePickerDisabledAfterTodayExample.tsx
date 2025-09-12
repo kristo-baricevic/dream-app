@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DateRange, DateRangePicker } from '@/components/DatePicker';
-import useIsMobile from '@/utils/useIsMobile';
+import useIsSmallScreen from '@/utils/isSmallScreen';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { fetchEntries, setSearchParams } from '@/redux/slices/journalSlice';
@@ -10,7 +10,7 @@ import { RootState } from '@/redux/rootReducer';
 
 export const DateRangePickerDisabledAfterTodayExample = () => {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined);
-  const isMobile = useIsMobile();
+  const isSmallScreen = useIsSmallScreen();
   const dispatch = useDispatch<AppDispatch>();
   const searchParams = useSelector((state: RootState) => state.journal.searchParams);
 
@@ -24,14 +24,14 @@ export const DateRangePickerDisabledAfterTodayExample = () => {
     }
   };
 
-  if (isMobile)
+  if (isSmallScreen)
     return (
       <div className="flex flex-col items-center gap-y-4 shadow-md">
         <DateRangePicker
           toDate={new Date()}
           value={dateRange}
           onChange={handleChange}
-          className="w-20"
+          className="w-50"
         />
       </div>
     );

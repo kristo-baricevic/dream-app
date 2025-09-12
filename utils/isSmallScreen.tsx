@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 
-const useIsMobile = (breakpoint = 900) => {
-  const [isMobile, setIsMobile] = useState(false);
+const useIsSmallScreen = (breakpoint = 950) => {
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < breakpoint);
+      setIsSmallScreen(window.innerWidth < breakpoint);
     };
 
     handleResize();
@@ -16,7 +16,7 @@ const useIsMobile = (breakpoint = 900) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [breakpoint]);
 
-  return isMobile;
+  return isSmallScreen;
 };
 
-export default useIsMobile;
+export default useIsSmallScreen;

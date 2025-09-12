@@ -68,7 +68,7 @@ const DreamMain: React.FC = () => {
           isLoadingNewEntry={isLoadingNewEntry}
         />
 
-        <div className="flex flex-row justify-center py-8 mt-8">
+        <div className="flex flex-row justify-center py-0 mt-8">
           <DreamCatcher entries={entries} onDeleteEntry={handleDeleteEntry} layout={layout} />
         </div>
       </>

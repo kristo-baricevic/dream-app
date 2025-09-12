@@ -5,7 +5,8 @@ import Link from 'next/link';
 import EntryCard from './EntryCard';
 import { JournalEntry } from '@/types';
 import ExpandedEntryCard from './ExpandedEntryCard';
-import useIsMobile from '@/utils/useIsMobile';
+import useIsSmallScreen from '@/utils/isSmallScreen';
+import useIsMobile from '@/utils/isMobile';
 
 type DreamCatcherProps = {
   entries: JournalEntry[];
@@ -31,6 +32,8 @@ const initAnalysis = {
 const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, layout }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -44,7 +47,9 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
     });
   };
 
+  const isSmallScreen = useIsSmallScreen();
   const isMobile = useIsMobile();
+  console.log('is mobile ', isMobile);
 
   if (!entries || entries.length === 0) {
     return (
@@ -56,7 +61,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   if (layout === 'list') {
     return (
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 p-4 mt-6">
         {entries.map((entry) => (
           <ExpandedEntryCard
             key={entry.id}
@@ -74,7 +79,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   if (layout === 'grid') {
     return (
-      <div className="flex flex-wrap gap-4 p-4 justify-center">
+      <div className="flex flex-wrap gap-4 p-4 mt-6 justify-center">
         {entries.map((entry) => (
           <ExpandedEntryCard
             key={entry.id}
@@ -129,35 +134,52 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
   const displayItems = getDisplayItems();
 
   return (
-    <div className="flex justify-center items-center p-4 gap-8 min-h-[400px] mt-6">
+    <div
+      className={`${isMobile ? '' : 'gap-8 p-4'} flex justify-center items-center min-h-[400px] mt-6`}
+    >
       {/* Left Arrow */}
       {entries.length > 1 && (
-        <button
-          onClick={() =>
-            setCurrentIndex(currentIndex === 0 ? entries.length - 1 : currentIndex - 1)
-          }
-          className="bg-white/80 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110 z-20"
-        >
-          <svg
-            className="w-6 h-6 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className={`${isMobile ? '' : ''} flex items-center justify-center h-full`}>
+          <button
+            onClick={() =>
+              setCurrentIndex(currentIndex === 0 ? entries.length - 1 : currentIndex - 1)
+            }
+            className="bg-white/80 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110 z-20 mb-24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
       )}
 
       {/* Entries */}
       <div className="flex justify-center items-center gap-4">
-        {isMobile ? (
-          <div className="w-full">
+        {isSmallScreen ? (
+          <div
+            className="w-full"
+            onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
+            onTouchEnd={(e) => {
+              if (touchStart === null) return;
+              const diff = e.changedTouches[0].clientX - touchStart;
+              if (diff > 50) {
+                setCurrentIndex(currentIndex === 0 ? entries.length - 1 : currentIndex - 1);
+              } else if (diff < -50) {
+                setCurrentIndex(currentIndex === entries.length - 1 ? 0 : currentIndex + 1);
+              }
+              setTouchStart(null);
+            }}
+          >
             <ExpandedEntryCard
               key={entries[currentIndex].id}
               entry={entries[currentIndex]}
@@ -215,7 +237,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
           onClick={() =>
             setCurrentIndex(currentIndex === entries.length - 1 ? 0 : currentIndex + 1)
           }
-          className="bg-white/80 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110 z-20"
+          className="bg-white/80 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110 z-20 mb-24"
         >
           <svg
             className="w-6 h-6 text-gray-700"

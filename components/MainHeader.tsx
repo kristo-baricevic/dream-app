@@ -18,9 +18,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { fetchEntries, setSearchParams } from '@/redux/slices/journalSlice';
 import { AnimatePresence, motion } from 'framer-motion';
-import useIsMobile from '@/utils/useIsMobile';
 import { DateRangePickerDisabledAfterTodayExample } from './DateRangePickerDisabledAfterTodayExample';
 import { RootState } from '@/redux/rootReducer';
+import useIsSmallScreen from '@/utils/isSmallScreen';
 
 type MainHeaderProps = {
   layout: string;
@@ -45,7 +45,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
   const searchParams = useSelector((state: RootState) => state.journal.searchParams);
 
   const [hasInteracted, setHasInteracted] = useState(false);
-  const isMobile = useIsMobile();
+  const isSmallScreen = useIsSmallScreen();
 
   useEffect(() => {
     if (!toggleSearch || !hasInteracted) return;
@@ -60,7 +60,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Top row */}
-      <div className="flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between gap-2">
         {/* Left → Search toggle */}
         {!toggleSearch ? (
           <div
@@ -77,11 +77,6 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
             Close
           </div>
         )}
-
-        {/* Date Picker */}
-        <div className="cursor-pointer">
-          <DateRangePickerDisabledAfterTodayExample />
-        </div>
 
         {/* Center → New Entry */}
         <div onClick={handleOnClick} className="cursor-pointer">
@@ -114,7 +109,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
           >
             <IconLayoutListFilled className="w-6 h-6" />
           </div>
-          {!isMobile && (
+          {!isSmallScreen && (
             <div
               className={`shadow-md flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${
                 layout === 'grid' ? 'bg-slate-200' : 'bg-slate-50'
@@ -152,6 +147,11 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
                 />
               </div>
             ))}
+
+            {/* Date Picker */}
+            <div className="cursor-pointer">
+              <DateRangePickerDisabledAfterTodayExample />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
