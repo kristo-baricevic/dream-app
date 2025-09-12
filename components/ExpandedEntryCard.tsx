@@ -10,6 +10,8 @@ import { useEffect } from 'react';
 import useIsSmallScreen from '@/utils/isSmallScreen';
 import useIsMobile from '@/utils/isMobile';
 import { formatAnalysis } from '@/utils/formatAnalysis';
+import BasicModal from './BasicModal';
+import ReactDOM from 'react-dom';
 
 type ExpandedEntryCardProps = {
   entry: JournalEntry;
@@ -53,6 +55,8 @@ const ExpandedEntryCard = ({
   }, [isExpanded]);
 
   const date = new Date(entry.created_at).toDateString();
+  const [deleteModal, setDeleteModal] = useState<boolean>(false);
+
   const [dreamAnalysis, setAnalysis] = useState<Partial<AnalysisData> | undefined>(entry.analysis);
   const isMobile = useIsMobile();
   const isSmallScreen = useIsSmallScreen();
@@ -96,25 +100,31 @@ const ExpandedEntryCard = ({
             className={`flex hover:opacity-50 cursor-pointer ${isMobile ? 'w-4 h-4 mt-[5px]' : 'w-6 h-6'} group`}
           >
             <IconEdit width="24" height="24" />
-            <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
+            {/* <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
               Edit
-            </span>
+            </span> */}
           </div>
 
           <div
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete(e);
+              setDeleteModal(true);
             }}
             className={`flex hover:opacity-50 cursor-pointer  ${isMobile ? 'w-4 h-4 mt-2' : 'w-6 h-6'} group`}
           >
             <Image src="/trash.svg" width="24" height="24" alt="Delete Icon" />
-            <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
+            {/* <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
               Delete
-            </span>
+            </span> */}
           </div>
         </div>
       </div>
+
+      {deleteModal &&
+        ReactDOM.createPortal(
+          <BasicModal handleConfirm={handleDelete} setDeleteModal={setDeleteModal} />,
+          document.body
+        )}
     </div>
   );
 };

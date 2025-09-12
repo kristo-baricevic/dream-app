@@ -7,6 +7,8 @@ import { IconEdit } from '@tabler/icons-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import ReactDOM from 'react-dom';
+import BasicModal from './BasicModal';
 
 type EntryCardProps = {
   entry: JournalEntry;
@@ -21,6 +23,7 @@ const EntryCard = ({ entry, href, onDelete }: EntryCardProps) => {
     e.preventDefault();
     onDelete(entry.id);
   };
+  const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
   const date = new Date(entry.created_at).toDateString();
   const [dreamAnalysis, setDreamAnalysis] = useState<Partial<AnalysisData> | undefined>(
@@ -43,24 +46,29 @@ const EntryCard = ({ entry, href, onDelete }: EntryCardProps) => {
           className="absolute bottom-4 right-20 hover:opacity-50 cursor-pointer w-6 h-6 group"
         >
           <IconEdit />
-          <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
+          {/* <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
             Edit
-          </span>
+          </span> */}
         </div>
 
         <div
           onClick={(e) => {
             e.stopPropagation();
-            handleDelete(e);
+            setDeleteModal(true);
           }}
           className="absolute bottom-4 right-12 hover:opacity-50 cursor-pointer w-6 h-6 group"
         >
           <Image src="/trash.svg" width="24" height="24" alt="Delete Icon" />
-          <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
+          {/* <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
             Delete
-          </span>
+          </span> */}
         </div>
       </div>
+      {deleteModal &&
+        ReactDOM.createPortal(
+          <BasicModal handleConfirm={handleDelete} setDeleteModal={setDeleteModal} />,
+          document.body
+        )}
     </div>
   );
 };
