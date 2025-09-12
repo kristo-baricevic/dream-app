@@ -42,7 +42,7 @@ export const DateRangePickerDisabledAfterTodayExample = () => {
         toDate={new Date()}
         value={dateRange}
         onChange={handleChange}
-        className="w-60 h-14"
+        className="w-60 h-10"
       />
     </div>
   );

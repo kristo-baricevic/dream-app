@@ -65,16 +65,16 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
         {!toggleSearch ? (
           <div
             onClick={() => setToggleSearch(true)}
-            className="px-2 bg-slate-50 shadow-md text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
+            className="px-2 bg-white shadow-md text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
           >
             Search
           </div>
         ) : (
           <div
-            className="px-2 bg-slate-100 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24"
+            className="px-2 bg-slate-300 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24"
             onClick={() => setToggleSearch(false)}
           >
-            Close
+            Search
           </div>
         )}
 

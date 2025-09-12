@@ -39,14 +39,14 @@ const Search: React.FC = () => {
       {!toggleSearch ? (
         <div
           onClick={() => setToggleSearch(true)}
-          className="px-2 bg-slate-50 text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24 mx-auto"
+          className="px-2 bg-white text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24 mx-auto"
         >
           Search
         </div>
       ) : (
         <div>
           <div
-            className="px-2 bg-slate-50 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24 mx-auto mb-4"
+            className="px-2 bg-slate-200 rounded-lg text-center py-2 border-2 border-gray-300 cursor-pointer w-24 mx-auto mb-4"
             onClick={() => setToggleSearch(false)}
           >
             Close
