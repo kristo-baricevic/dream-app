@@ -5,11 +5,9 @@ export type JournalEntry = {
   created_at: Date;
   updated_at: Date;
   content: string;
-  analysis?: {
-    summary: string;
-    color: string;
-    subject: string;
-  };
+  analysis?: 
+    AnalysisData
+  ;
 };
 
 export type AnalysisData = {

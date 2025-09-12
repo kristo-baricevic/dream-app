@@ -6,6 +6,7 @@ const links = [
   { href: '/', label: 'Landing Page' },
   { href: '/journal', label: 'Home' },
   { href: '/history', label: 'Charts' },
+  { href: '/playlist', label: 'Playlist' },
   { href: '/about', label: 'About' },
 ];
 
