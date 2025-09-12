@@ -1,4 +1,5 @@
 // import { UserButton } from "@clerk/nextjs";
+import { IconCloudFilled } from '@tabler/icons-react';
 import Link from 'next/link';
 
 const links = [
@@ -16,8 +17,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-pink-100 background-main font-sans">
       <header className="bg-white border-b border-black/10 sticky">
-        <div className="bg-gradient-to-r from-pink-200 via-pink-300 to-pink-400 flex justify-between items-center max-w-screen-xl mx-auto p-4 tw-w-full">
-          <h1 className="text-2xl">Dream With AI</h1>
+        <div className="bg-gradient-to-r from-pink-200 via-pink-300 to-pink-400 flex justify-between items-center min-w-screen mx-auto p-4 tw-w-full">
+          <div className="flex flex-row">
+            <h1 className="flex justify-center items-center text-2xl gap-2">
+              {' '}
+              <IconCloudFilled className="flex justify-center items-center w-6 h-6 text-white" />
+              Dream With AI
+            </h1>
+          </div>
           {/* <UserButton /> */}
         </div>
       </header>
