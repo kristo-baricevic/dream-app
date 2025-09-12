@@ -29,8 +29,8 @@ export default function PlaylistPage() {
       <div className="flex flex-col">
         <div className="w-full h-full bg-pink-200 px-4 py-4">PLAYLIST</div>
         <div className="mt-4 mb-4">
-          Our Dream Doctor at times feels inclined suggest some songs based off your dream analysis.
-          This is a playlist made from the AI interpretations of your dreams!
+          Our Dream Doctor at times feels inclined to suggest some songs based off your dream
+          analysis. This is a playlist made from the AI interpretations of your dreams!
         </div>
         <div className="w-full h-full bg-slate-50 rounded-xl border border-slate-400 px-4 py-4">
           {playlist && playlist.playlist.length > 0 ? (
