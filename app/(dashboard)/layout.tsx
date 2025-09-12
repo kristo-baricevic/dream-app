@@ -30,9 +30,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </header>
       <nav className="bg-white border-b border-black/10">
-        <ul className="flex space-x-4 justify-center">
+        <ul className="flex sm:space-x-4 justify-center">
           {links.map((link) => (
-            <li className="hover:bg-pink-300 px-4 py-2" key={link.href}>
+            <li className="hover:bg-pink-300 px-4 py-2 text-xs sm:text-base" key={link.href}>
               <Link href={link.href}>{link.label}</Link>
             </li>
           ))}
