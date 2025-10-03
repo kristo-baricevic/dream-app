@@ -10,6 +10,11 @@ const local = false;
 const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;
 
+const entriesUrlFrom = (nextUrl: string) => {
+  const u = new URL(nextUrl, API_URL); // works for absolute or relative
+  return `${API_URL}/api/entries/?${u.searchParams.toString()}`;
+};
+
 type PaginatedResponse = {
   count: number;
   next: string | null;
@@ -65,19 +70,16 @@ export const fetchEntries = createAsyncThunk<PaginatedResponse, SearchParams>(
 
 export const fetchNextEntries = createAsyncThunk<PaginatedResponse, void, { state: RootState }>(
   'journal/fetchNextEntries',
-  async (_m, { getState, rejectWithValue }) => {
-    const state = getState();
-    const nextUrl: string | null = state.journal.pagination.next;
+  async (_, { getState, rejectWithValue }) => {
+    const nextUrl = getState().journal.pagination.next;
+    if (!nextUrl) return rejectWithValue('No next page') as never;
 
-    if (!nextUrl) return rejectWithValue('No next page');
-
-    const res = await fetch(nextUrl, { credentials: 'include' });
-
+    const normalized = entriesUrlFrom(nextUrl); // ← build the correct URL
+    const res = await fetch(normalized, { credentials: 'include' });
     if (!res.ok) {
       const errorText = await res.text();
       throw new Error(`Failed to fetch next page. Status: ${res.status}, Message: ${errorText}`);
     }
-
     return res.json();
   }
 );

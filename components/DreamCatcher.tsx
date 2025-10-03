@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/rootReducer';
 import { fetchNextEntries } from '@/redux/slices/journalSlice';
 import { AppDispatch } from '@/redux/store';
+import LoadSentinel from './LoadSentinel';
 
 type DreamCatcherProps = {
   entries: JournalEntry[];
@@ -70,42 +71,6 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
     }
   }, [currentIndex, entries.length, pagination.hasNext, loading, dispatch, isPrefetching]);
 
-  // sentinel & flag to avoid duplicate fetches
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-
-  // intersection observer
-  useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      async (entriesObs) => {
-        const first = entriesObs[0];
-        if (!first.isIntersecting) return;
-        if (isFetchingMore || loading) return;
-        if (!pagination.hasNext) return;
-
-        try {
-          setIsFetchingMore(true);
-          await dispatch(fetchNextEntries()).unwrap();
-        } catch (e) {
-          console.error('Infinite scroll fetchNextEntries failed:', e);
-        } finally {
-          setIsFetchingMore(false);
-        }
-      },
-      {
-        root: null, // viewport
-        rootMargin: '200px', // start loading *before* user hits the end
-        threshold: 0.0,
-      }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [dispatch, pagination.hasNext, loading, isFetchingMore]);
-
   if (!entries || entries.length === 0) {
     return (
       <div className="flex justify-center p-8">
@@ -129,12 +94,12 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
           />
         ))}
 
-        {/* Infinite scroll sentinel */}
-        <div ref={sentinelRef} className="h-8 w-full" />
-
-        {(isFetchingMore || loading) && pagination.hasNext && (
-          <div className="flex justify-center py-4 text-gray-500 text-sm">Loading more…</div>
-        )}
+        <LoadSentinel
+          hasNext={pagination.hasNext}
+          onLoadMore={async () => {
+            await dispatch(fetchNextEntries()).unwrap();
+          }}
+        />
       </div>
     );
   }
@@ -154,14 +119,12 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
           />
         ))}
 
-        {/* Infinite scroll sentinel */}
-        <div ref={sentinelRef} className="h-8 w-full" />
-
-        {(isFetchingMore || loading) && pagination.hasNext && (
-          <div className="flex justify-center basis-full py-4 text-gray-500 text-sm">
-            Loading more…
-          </div>
-        )}
+        <LoadSentinel
+          hasNext={pagination.hasNext}
+          onLoadMore={async () => {
+            await dispatch(fetchNextEntries()).unwrap();
+          }}
+        />
       </div>
     );
   }
