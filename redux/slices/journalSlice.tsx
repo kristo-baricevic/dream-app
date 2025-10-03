@@ -1,8 +1,14 @@
 // src/redux/slices/journalSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { JournalEntry } from '@/types';
+import { EmotionType } from '@/utils/parameters/emotions';
+import next from 'next';
+import { RootState } from '../rootReducer';
+
+const local = false;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
+const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;
 
 type PaginatedResponse = {
   count: number;
@@ -57,6 +63,25 @@ export const fetchEntries = createAsyncThunk<PaginatedResponse, SearchParams>(
   }
 );
 
+export const fetchNextEntries = createAsyncThunk<PaginatedResponse, void, { state: RootState }>(
+  'journal/fetchNextEntries',
+  async (_m, { getState, rejectWithValue }) => {
+    const state = getState();
+    const nextUrl: string | null = state.journal.pagination.next;
+
+    if (!nextUrl) return rejectWithValue('No next page');
+
+    const res = await fetch(nextUrl, { credentials: 'include' });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch next page. Status: ${res.status}, Message: ${errorText}`);
+    }
+
+    return res.json();
+  }
+);
+
 export const deleteEntryThunk = createAsyncThunk<string, string>(
   'journal/deleteEntry',
   async (id: string, { rejectWithValue }) => {
@@ -103,6 +128,25 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
     }
   }
 );
+
+export const updateEntryThunk = createAsyncThunk<
+  JournalEntry,
+  { id: string; content: string; personality: string; mood: EmotionType }
+>('journal/updateEntry', async ({ id, content, personality, mood }) => {
+  const res = await fetch(`${API_URL}/api/entries/${id}/update/`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ content, personality, mood }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || 'Failed to update entry');
+  }
+
+  return res.json();
+});
 
 const initialState: JournalState = {
   entries: [],
@@ -177,6 +221,32 @@ const journalSlice = createSlice({
       })
       .addCase(createEntryThunk.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(updateEntryThunk.fulfilled, (state, action) => {
+        const idx = state.entries.findIndex((e) => e.id === action.payload.id);
+        if (idx !== -1) state.entries[idx] = action.payload;
+      })
+      .addCase(fetchNextEntries.fulfilled, (state, action) => {
+        const incoming = action.payload.results;
+        const existingIds = new Set(state.entries.map((e) => e.id));
+        const merged = [...state.entries];
+
+        for (const item of incoming) {
+          if (!existingIds.has(item.id)) merged.push(item);
+        }
+
+        state.entries = merged;
+        state.pagination = {
+          count: action.payload.count,
+          next: action.payload.next,
+          previous: action.payload.previous,
+          hasNext: !!action.payload.next,
+          hasPrevious: !!action.payload.previous,
+        };
+      })
+      .addCase(fetchNextEntries.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) || action.error.message || 'Failed to fetch next page';
       });
   },
 });

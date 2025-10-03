@@ -22,7 +22,7 @@ const DreamMain: React.FC = () => {
 
   useEffect(() => {
     if (userId) {
-      dispatch(fetchEntries({}));
+      dispatch(fetchEntries({ page: 1, pageSize: 10 }));
     }
   }, [userId, dispatch]);
 

@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import EntryCard from './EntryCard';
 import { JournalEntry } from '@/types';
 import ExpandedEntryCard from './ExpandedEntryCard';
 import useIsSmallScreen from '@/utils/isSmallScreen';
 import useIsMobile from '@/utils/isMobile';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/redux/rootReducer';
+import { fetchNextEntries } from '@/redux/slices/journalSlice';
+import { AppDispatch } from '@/redux/store';
 
 type DreamCatcherProps = {
   entries: JournalEntry[];
@@ -33,6 +37,9 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { pagination, loading } = useSelector((s: RootState) => s.journal);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const toggleExpand = (id: string) => {
@@ -49,7 +56,19 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   const isSmallScreen = useIsSmallScreen();
   const isMobile = useIsMobile();
-  console.log('is mobile ', isMobile);
+
+  const [isPrefetching, setIsPrefetching] = useState(false);
+
+  useEffect(() => {
+    const nearEnd = entries.length > 0 && currentIndex >= entries.length - 2;
+    if (nearEnd && pagination.hasNext && !isPrefetching && !loading) {
+      setIsPrefetching(true);
+      dispatch(fetchNextEntries())
+        .unwrap()
+        .catch(() => {})
+        .finally(() => setIsPrefetching(false));
+    }
+  }, [currentIndex, entries.length, pagination.hasNext, loading, dispatch, isPrefetching]);
 
   if (!entries || entries.length === 0) {
     return (
@@ -110,7 +129,6 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
       ];
     }
 
-    // For 3 or more entries
     const prevIndex = currentIndex === 0 ? totalEntries - 1 : currentIndex - 1;
     const nextIndex = currentIndex === totalEntries - 1 ? 0 : currentIndex + 1;
 
@@ -123,11 +141,8 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   const handleItemClick = (index: number, position: string) => {
     if (position === 'current') {
-      // Navigate to the entry page when clicking current item
       return;
     }
-
-    // Move the clicked item to center
     setCurrentIndex(index);
   };
 
@@ -169,13 +184,31 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
           <div
             className="w-full"
             onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
-            onTouchEnd={(e) => {
+            onTouchEnd={async (e) => {
               if (touchStart === null) return;
               const diff = e.changedTouches[0].clientX - touchStart;
+
               if (diff > 50) {
+                // swipe right (previous)
                 setCurrentIndex(currentIndex === 0 ? entries.length - 1 : currentIndex - 1);
               } else if (diff < -50) {
-                setCurrentIndex(currentIndex === entries.length - 1 ? 0 : currentIndex + 1);
+                // swipe left (next)
+                const atLast = currentIndex === entries.length - 1;
+
+                if (atLast && pagination.hasNext && !isLoadingMore && !loading) {
+                  try {
+                    setIsLoadingMore(true);
+                    await dispatch(fetchNextEntries()).unwrap();
+                    setCurrentIndex((prev) => prev + 1);
+                  } catch (err) {
+                    console.error('Failed to load next page:', err);
+                    setCurrentIndex(0);
+                  } finally {
+                    setIsLoadingMore(false);
+                  }
+                } else {
+                  setCurrentIndex(currentIndex === entries.length - 1 ? 0 : currentIndex + 1);
+                }
               }
               setTouchStart(null);
             }}
@@ -234,9 +267,34 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
       {/* Right Arrow */}
       {entries.length > 1 && (
         <button
-          onClick={() =>
-            setCurrentIndex(currentIndex === entries.length - 1 ? 0 : currentIndex + 1)
-          }
+          onClick={async () => {
+            const atLast = currentIndex === entries.length - 1;
+
+            if (!atLast) {
+              setCurrentIndex((i) => i + 1);
+              return;
+            }
+
+            // at end:
+            if (pagination.hasNext) {
+              // if prefetch already appended, just move forward
+              if (!isPrefetching && entries.length > currentIndex + 1) {
+                setCurrentIndex((i) => i + 1);
+                return;
+              }
+              // fallback: fetch now if prefetch didn't land yet
+              try {
+                await dispatch(fetchNextEntries()).unwrap();
+                setCurrentIndex((i) => i + 1);
+              } catch {
+                // optional: wrap if fetch fails
+                setCurrentIndex(0);
+              }
+            } else {
+              // no more pages: keep your wrap behavior
+              setCurrentIndex(0);
+            }
+          }}
           className="bg-white/80 hover:bg-white shadow-lg rounded-full p-3 transition-all hover:scale-110 z-20 mb-24"
         >
           <svg

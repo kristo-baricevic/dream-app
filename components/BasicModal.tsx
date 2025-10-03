@@ -17,6 +17,7 @@ export default function BasicModal({ handleConfirm, setDeleteModal }: ModalProps
           <button
             className="px-4 py-2 rounded-lg border border-slate-400 text-slate-700 hover:bg-slate-100 transition"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               setDeleteModal(false);
             }}
@@ -26,8 +27,9 @@ export default function BasicModal({ handleConfirm, setDeleteModal }: ModalProps
           <button
             className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
-              handleConfirm;
+              handleConfirm();
             }}
           >
             Confirm

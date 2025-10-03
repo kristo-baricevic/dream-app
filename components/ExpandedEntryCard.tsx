@@ -31,12 +31,16 @@ const ExpandedEntryCard = ({
 }: ExpandedEntryCardProps) => {
   const router = useRouter();
 
-  const handleDelete = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+  const handleDelete = () => {
     onDelete(entry.id);
+    setDeleteModal(false);
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.toolbar')) {
+      return;
+    }
     if (onToggleExpand) {
       onToggleExpand();
     }
@@ -67,7 +71,13 @@ const ExpandedEntryCard = ({
     <div
       className={`${isExpanded ? 'cloud-tall' : 'cloud'} border border-style border-black transition-all duration-500 ease-in-out cursor-pointer`}
       style={cloudStyle}
-      onClick={handleClick}
+      onClick={(e) => {
+        if (deleteModal) {
+          e.stopPropagation();
+          return;
+        }
+        handleClick(e);
+      }}
     >
       <div className={`${isExpanded ? 'mt-4' : ''} ml-10 flex flex-col`}>
         <div className="flex flex-col">
@@ -100,7 +110,7 @@ const ExpandedEntryCard = ({
           )}
         </div>
 
-        <div className={`flex justify-end mr-12 ${isExpanded ? 'mt-6' : ''} gap-2`}>
+        <div className={`flex justify-end mr-12 ${isExpanded ? 'mt-6' : ''} gap-2 toolbar`}>
           <div
             className="cursor-pointer mr-2"
             onClick={(e) => {
@@ -145,9 +155,6 @@ const ExpandedEntryCard = ({
             className={`flex hover:opacity-50 cursor-pointer  ${isMobile ? 'w-4 h-4 mt-2' : 'w-6 h-6'} group`}
           >
             <Image src="/trash.svg" width="24" height="24" alt="Delete Icon" />
-            {/* <span className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1">
-              Delete
-            </span> */}
           </div>
         </div>
       </div>
