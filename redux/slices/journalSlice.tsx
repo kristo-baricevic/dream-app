@@ -11,7 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;
 
 const entriesUrlFrom = (nextUrl: string) => {
-  const u = new URL(nextUrl, API_URL); // works for absolute or relative
+  const u = new URL(nextUrl, API_URL);
   return `${API_URL}/api/entries/?${u.searchParams.toString()}`;
 };
 
