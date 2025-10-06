@@ -141,7 +141,7 @@ export const askCustomQuestion = async (
   settings: Settings,
   ) => {
   const personalityPrompt = getPersonality(settings.doctorPersonality);
-  const URL = local ? `${FAST_API_URL}/custom-question` : `${API_URL}/fastapi/qa`;
+  const URL = local ? `${FAST_API_URL}/custom-question` : `${API_URL}/fastapi/custom-question`;
 
   const res = await fetch(
     new Request(URL, {
