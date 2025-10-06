@@ -1,6 +1,7 @@
 import { JournalEntry } from '@/types';
 import { EmotionType } from '../parameters/emotions';
 import { getPersonality } from '../parameters/personalities';
+import { Settings } from '@/redux/slices/settingsSlice';
 
 export const createURL = (path: string) => {
   return window.location.origin + path;
@@ -84,26 +85,27 @@ export const deleteEntry = async (id: string) => {
 };
 
 export const askQuestion = async (
-  question: string,
   entries: JournalEntry[],
-  personality: string = 'academic'
+  settings: Settings
+  // personality: string = 'academic'
 ) => {
-  const personalityPrompt = getPersonality(personality);
+  const personalityPrompt = getPersonality(settings.doctorPersonality);
+  const URL = local ? `${FAST_API_URL}/qa` : `${API_URL}/fastapi/qa`;
 
   const res = await fetch(
-    new Request(`${API_URL}/fastapi/qa`, {
+    new Request(URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        question,
         entries: entries.map((entry) => ({
           id: entry.id,
           created_at: entry.created_at,
           content: entry.content,
         })),
-        personality: personalityPrompt, // ← ADD THIS LINE
+        personality: personalityPrompt,
+        settings: settings,
       }),
     })
   );
@@ -136,12 +138,13 @@ export const generateDream = async (question: string) => {
 export const askCustomQuestion = async (
   question: string,
   entries: JournalEntry[],
-  personality: string = 'academic'
-) => {
-  const personalityPrompt = getPersonality(personality);
+  settings: Settings,
+  ) => {
+  const personalityPrompt = getPersonality(settings.doctorPersonality);
+  const URL = local ? `${FAST_API_URL}/custom-question` : `${API_URL}/fastapi/qa`;
 
   const res = await fetch(
-    new Request(`${API_URL}/fastapi/custom-question`, {
+    new Request(URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -150,6 +153,7 @@ export const askCustomQuestion = async (
         question,
         entries,
         personality: personalityPrompt,
+        settings: settings
       }),
     })
   );

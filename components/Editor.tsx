@@ -32,7 +32,7 @@ const Editor = ({ entry }: any) => {
           { name: 'Summary', value: summary },
           { name: 'Title', value: subject },
           { name: 'Mood', value: analysisMood },
-          { name: 'Good or Bad Dream', value: negative ? 'Good 🙂' : 'Bad 😔' },
+          { name: 'Good or Bad Dream', value: negative ? 'Bad 😔' : 'Good 🙂' },
           { name: 'Analysis', value: interpretation },
         ]
       : [];

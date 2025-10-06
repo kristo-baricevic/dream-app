@@ -20,7 +20,7 @@ const initialState: PlaylistState = {
 };
 
 const playlistSlice = createSlice({
-  name: 'analysis',
+  name: 'playlist',
   initialState,
   reducers: {
     addSong: (state, action: PayloadAction<Omit<Track, 'track'>>) => {

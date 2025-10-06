@@ -6,6 +6,10 @@ import PersonalitySelection from './PersonalityDropdown';
 import { getPersonality } from '@/utils/parameters/personalities';
 import Image from 'next/image';
 import { JournalEntry } from '@/types';
+import { RootState } from '@/redux/rootReducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSettings } from '@/redux/slices/settingsSlice';
+import { AppDispatch } from '@/redux/store';
 
 type QuestionProps = {
   entries: JournalEntry[];
@@ -18,6 +22,9 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [isQuestion, setIsQuestion] = useState(false);
   const [selectedPersonality, setSelectedPersonality] = useState('academic');
 
+  const settings = useSelector((state: RootState) => state.settings);
+  const dispatch = useDispatch<AppDispatch>();
+
   const onChange = (e: { target: { value: SetStateAction<string> } }) => {
     setValue(e.target.value);
   };
@@ -29,7 +36,17 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    const answer = await askQuestion(value, entries, selectedPersonality);
+    await dispatch(
+      setSettings({
+        astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
+        occupation: 'Developer',
+        medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
+        personality: 'INTJ',
+        doctorPersonality: 'empathetic',
+      })
+    );
+    const answer = await askQuestion(entries, settings);
+
     setResponse(answer);
     setValue('');
     setLoading(false);
@@ -45,7 +62,16 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const handleSubmitQuestion = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    const answer = await askCustomQuestion(value, entries, selectedPersonality);
+    await dispatch(
+      setSettings({
+        astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
+        occupation: 'Developer',
+        medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
+        personality: 'INTJ',
+        doctorPersonality: 'empathetic',
+      })
+    );
+    const answer = await askCustomQuestion(value, entries, settings);
     setResponse(answer);
     setValue('');
     setLoading(false);

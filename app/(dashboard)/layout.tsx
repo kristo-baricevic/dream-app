@@ -7,6 +7,7 @@ const links = [
   { href: '/journal', label: 'Home' },
   { href: '/history', label: 'Charts' },
   { href: '/playlist', label: 'Playlist' },
+  { href: '/settings', label: 'Settings' },
   { href: '/about', label: 'About' },
 ];
 
