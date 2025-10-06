@@ -101,7 +101,6 @@ const Editor = ({ entry }: any) => {
 
     try {
       const res = await generateDream(prompt);
-      console.log('inside the try catch', res);
       setValue(res);
     } catch (error) {
       console.error('Failed to generate dream:', error);
@@ -114,7 +113,6 @@ const Editor = ({ entry }: any) => {
   const handleDelete = async () => {
     try {
       const res = await deleteEntry(entry.id);
-      console.log('delete response', res);
       router.push('/');
     } catch (error) {
       console.error('Failed to delete entry:', error);

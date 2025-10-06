@@ -24,3 +24,8 @@ export type AnalysisData = {
   subject: string;
   sentimentScore: number;
 };
+
+export type Mood = {
+  mood: string;
+  color: string;
+};

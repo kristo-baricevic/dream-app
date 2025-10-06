@@ -13,7 +13,6 @@ export default function Home() {
   const href = '/journal';
 
   useEffect(() => {
-    console.log('shooting star useEffect');
     createShootingStar();
   }, []);
 

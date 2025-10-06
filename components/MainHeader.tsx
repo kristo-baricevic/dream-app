@@ -3,6 +3,7 @@
 import { AnalysisData, JournalEntry } from '@/types';
 import { lightenColor } from '@/utils/colorUtilities';
 import {
+  IconCancel,
   IconEdit,
   IconLayoutDistributeHorizontalFilled,
   IconLayoutGridFilled,
@@ -16,7 +17,7 @@ import Search from './Search';
 import NewEntryCard from './NewEntryCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { fetchEntries, setSearchParams } from '@/redux/slices/journalSlice';
+import { fetchEntries, fetchMoods, setSearchParams } from '@/redux/slices/journalSlice';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DateRangePickerDisabledAfterTodayExample } from './DateRangePickerDisabledAfterTodayExample';
 import { RootState } from '@/redux/rootReducer';
@@ -36,11 +37,13 @@ type DreamSearch = {
   analysis: string;
 };
 
-const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'moods', 'analysis'];
+const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'analysis', 'moods'];
 
 const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: MainHeaderProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const [toggleSearch, setToggleSearch] = useState(false);
+  const moods = useSelector((state: RootState) => state.journal.moods);
+  const [moodsFetched, setMoodsFetched] = useState(false);
 
   const searchParams = useSelector((state: RootState) => state.journal.searchParams);
 
@@ -64,7 +67,13 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
         {/* Left → Search toggle */}
         {!toggleSearch ? (
           <div
-            onClick={() => setToggleSearch(true)}
+            onClick={() => {
+              if (!moodsFetched) {
+                dispatch(fetchMoods());
+                setMoodsFetched(true);
+              }
+              setToggleSearch(true);
+            }}
             className="px-2 bg-white shadow-md text-center py-2 border-2 border-gray-300 cursor-pointer rounded-lg w-24"
           >
             Search
@@ -132,26 +141,60 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {searchFields.map((field) => (
-              <div key={field} className="relative">
-                <label className="absolute -top-[12.5px] left-3 px-1 text-xs text-gray-600 border border-gray-300 rounded-md bg-white">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </label>
-                <input
-                  className="rounded-lg bg-gray-200 px-2 border border-gray-300 h-10"
-                  value={searchParams[field] || ''}
-                  onChange={(e) => {
-                    setHasInteracted(true);
-                    dispatch(setSearchParams({ [field]: e.target.value }));
-                  }}
-                />
-              </div>
-            ))}
-
             {/* Date Picker */}
             <div className="cursor-pointer">
               <DateRangePickerDisabledAfterTodayExample />
             </div>
+            {searchFields.map((field) =>
+              field === 'moods' ? (
+                // Render mood circles for 'moods' field
+                <div key={field} className="flex gap-3 flex-wrap">
+                  <div
+                    className="w-10 h-10 rounded-full cursor-pointer transition-transform hover:scale-110"
+                    onClick={() => {
+                      dispatch(setSearchParams({ moods: '' }));
+                      dispatch(fetchEntries({ moods: '' }));
+                    }}
+                  >
+                    <IconCancel className="w-10 h-10" />
+                  </div>
+                  {moods?.map((moodData) => (
+                    <div key={moodData.mood} className="relative group">
+                      <div
+                        className="w-10 h-10 rounded-full cursor-pointer transition-transform hover:scale-110"
+                        style={{ backgroundColor: moodData.color }}
+                        onClick={() => {
+                          dispatch(setSearchParams({ moods: moodData.mood }));
+                          dispatch(fetchEntries({ moods: moodData.mood }));
+                        }}
+                      />
+
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                        {moodData?.mood}
+                        {/* Arrow */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // Render regular input for other fields
+                <div key={field} className="relative">
+                  <label className="absolute -top-[12.5px] left-3 px-1 text-xs text-gray-600 border border-gray-300 rounded-md bg-white">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </label>
+                  <input
+                    className="rounded-lg bg-gray-200 px-2 border border-gray-300 h-10"
+                    value={searchParams[field] || ''}
+                    onChange={(e) => {
+                      setHasInteracted(true);
+                      dispatch(setSearchParams({ [field]: e.target.value }));
+                    }}
+                  />
+                </div>
+              )
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,6 +1,6 @@
 // src/redux/slices/journalSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { JournalEntry } from '@/types';
+import { JournalEntry, Mood } from '@/types';
 import { EmotionType } from '@/utils/parameters/emotions';
 import next from 'next';
 import { RootState } from '../rootReducer';
@@ -24,6 +24,7 @@ type PaginatedResponse = {
 
 type JournalState = {
   entries: JournalEntry[];
+  moods: Mood[];
   pagination: {
     count: number;
     next: string | null;
@@ -84,6 +85,14 @@ export const fetchNextEntries = createAsyncThunk<PaginatedResponse, void, { stat
   }
 );
 
+export const fetchMoods = createAsyncThunk('journal/fetchMoods', async () => {
+  const res = await fetch(`${API_URL}/api/entries/moods`, {
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error('Failed to fetch entries');
+  return res.json();
+});
+
 export const deleteEntryThunk = createAsyncThunk<string, string>(
   'journal/deleteEntry',
   async (id: string, { rejectWithValue }) => {
@@ -123,7 +132,6 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
       }
 
       const data = await res.json();
-      console.log('New entry data:', data);
       return data as JournalEntry;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to create entry');
@@ -152,6 +160,7 @@ export const updateEntryThunk = createAsyncThunk<
 
 const initialState: JournalState = {
   entries: [],
+  moods: [],
   pagination: {
     count: 0,
     next: null,
@@ -249,6 +258,9 @@ const journalSlice = createSlice({
       .addCase(fetchNextEntries.rejected, (state, action) => {
         state.error =
           (action.payload as string) || action.error.message || 'Failed to fetch next page';
+      })
+      .addCase(fetchMoods.fulfilled, (state, action) => {
+        state.moods = action.payload.moods;
       });
   },
 });

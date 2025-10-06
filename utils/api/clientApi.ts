@@ -30,7 +30,6 @@ export const updatedEntry = async (
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Entry updated successfully:', data);
       return data;
     } else {
       const errorData = await response.json();
@@ -56,7 +55,6 @@ export const createNewEntry = async (content: string = 'New entry') => {
 
   if (res.ok) {
     const data = await res.json();
-    console.log('New entry data:', data);
     return data;
   } else {
     const errorData = await res.json();
@@ -131,7 +129,6 @@ export const generateDream = async (question: string) => {
 
   if (res.ok) {
     const data = await res.json();
-    console.log('data for dream ', data);
     return data.dream;
   }
 };
