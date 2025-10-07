@@ -1,9 +1,8 @@
-// src/redux/slices/analysisSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AnalysisData, CumulativeAnalysisData } from '@/types';
+import { CustomQuestionData } from '@/types';
 
-type AnalysisState = {
-  items: CumulativeAnalysisData[];
+type CustomQuestionState = {
+  items: CustomQuestionData[];
   loading: boolean;
   error: string | null;
   count: number;
@@ -18,8 +17,9 @@ type PaginatedResponse = {
   count: number;
   next: string | null;
   previous: string | null;
-  results: CumulativeAnalysisData[];
+  results: CustomQuestionData[];
 };
+
 type SearchParams = {
   page?: number;
   pageSize?: number;
@@ -29,7 +29,7 @@ type SearchParams = {
   end_date?: string;
 };
 
-const initialState: AnalysisState = {
+const initialState: CustomQuestionState = {
   items: [],
   loading: false,
   error: null,
@@ -43,8 +43,8 @@ const entriesUrlFrom = (nextUrl: string) => {
   return `${API_URL}/api/entries/?${u.searchParams.toString()}`;
 };
 
-export const fetchAllAnalyses = createAsyncThunk<PaginatedResponse, SearchParams>(
-  'analysis/fetchAll',
+export const fetchAllCustomQuestions = createAsyncThunk<PaginatedResponse, SearchParams>(
+  'customQuestion/fetchAll',
   async (params: SearchParams = {}) => {
     const { page = 1, pageSize = 10, ...filters } = params;
 
@@ -56,7 +56,7 @@ export const fetchAllAnalyses = createAsyncThunk<PaginatedResponse, SearchParams
       ),
     });
 
-    const res = await fetch(`${API_URL}/api/cumulative-analyses/?${query.toString()}`, {
+    const res = await fetch(`${API_URL}/api/custom-questions/?${query.toString()}`, {
       credentials: 'include',
     });
 
@@ -65,23 +65,23 @@ export const fetchAllAnalyses = createAsyncThunk<PaginatedResponse, SearchParams
   }
 );
 
-const analysisSlice = createSlice({
-  name: 'analysis',
+const customQuestionSlice = createSlice({
+  name: 'customQuestion',
   initialState,
   reducers: {
-    setAnalyses: (state, action: PayloadAction<CumulativeAnalysisData[]>) => {
+    setCustomQuestions: (state, action: PayloadAction<CustomQuestionData[]>) => {
       state.items = action.payload;
     },
-    addAnalysis: (state, action: PayloadAction<CumulativeAnalysisData>) => {
+    addCustomQuestion: (state, action: PayloadAction<CustomQuestionData>) => {
       state.items.push(action.payload);
     },
-    updateAnalysis: (state, action: PayloadAction<CumulativeAnalysisData>) => {
+    updateCustomQuestion: (state, action: PayloadAction<CustomQuestionData>) => {
       const index = state.items.findIndex((a) => a.id === action.payload.id);
       if (index !== -1) {
         state.items[index] = action.payload;
       }
     },
-    deleteAnalysis: (state, action: PayloadAction<string>) => {
+    deleteCustomQuestion: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((a) => a.id !== action.payload);
     },
     clearError: (state) => {
@@ -90,24 +90,29 @@ const analysisSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAllAnalyses.pending, (state) => {
+      .addCase(fetchAllCustomQuestions.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAllAnalyses.fulfilled, (state, action) => {
+      .addCase(fetchAllCustomQuestions.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload.results;
         state.count = action.payload.count;
         state.next = action.payload.next;
         state.previous = action.payload.previous;
       })
-      .addCase(fetchAllAnalyses.rejected, (state, action) => {
+      .addCase(fetchAllCustomQuestions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { setAnalyses, addAnalysis, updateAnalysis, deleteAnalysis, clearError } =
-  analysisSlice.actions;
-export default analysisSlice.reducer;
+export const {
+  setCustomQuestions,
+  addCustomQuestion,
+  updateCustomQuestion,
+  deleteCustomQuestion,
+  clearError,
+} = customQuestionSlice.actions;
+export default customQuestionSlice.reducer;

@@ -46,7 +46,6 @@ const settingsSlice = createSlice({
       state.medicalHistory = action.payload.medicalHistory;
       state.personality = action.payload.personality;
       state.doctorPersonality = action.payload.doctorPersonality;
-      console.log('state ', state);
     },
     setAstrology: (state, action: PayloadAction<Astrology>) => {
       state.astrology = action.payload;

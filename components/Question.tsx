@@ -20,7 +20,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState('');
   const [isQuestion, setIsQuestion] = useState(false);
-  const [selectedPersonality, setSelectedPersonality] = useState('academic');
+  const [selectedPersonality, setSelectedPersonality] = useState('Academic');
 
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch<AppDispatch>();
@@ -42,7 +42,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
       occupation: 'Developer',
       medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
       personality: 'INTJ',
-      doctorPersonality: settings.doctorPersonality,
+      doctorPersonality: selectedPersonality,
     };
 
     dispatch(setSettings(newSettings));
@@ -64,15 +64,15 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const handleSubmitQuestion = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    dispatch(
-      setSettings({
-        astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
-        occupation: 'Developer',
-        medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
-        personality: 'INTJ',
-        doctorPersonality: settings.doctorPersonality,
-      })
-    );
+    const newSettings = {
+      astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
+      occupation: 'Developer',
+      medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
+      personality: 'INTJ',
+      doctorPersonality: selectedPersonality,
+    };
+
+    dispatch(setSettings(newSettings));
     const answer = await askCustomQuestion(value, entries, settings);
     setResponse(answer);
     setValue('');

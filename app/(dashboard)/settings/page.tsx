@@ -104,8 +104,8 @@ export default function Settings() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Settings</h1>
-
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
+      <p className="italic text-gray-500 mb-6">Note: Settings cannot be changed in demo mode.</p>
       {/* Astrology Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Astrology</h2>

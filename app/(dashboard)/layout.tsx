@@ -5,9 +5,9 @@ import Link from 'next/link';
 const links = [
   // { href: '/', label: 'Landing Page' },
   { href: '/journal', label: 'Home' },
-  { href: '/history', label: 'Charts' },
   { href: '/analysis', label: 'Analysis' },
-  { href: '/playlist', label: 'Playlist' },
+  { href: '/history', label: 'Charts' },
+  // { href: '/playlist', label: 'Playlist' },
   { href: '/settings', label: 'Settings' },
   { href: '/about', label: 'About' },
 ];

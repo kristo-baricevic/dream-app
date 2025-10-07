@@ -33,6 +33,16 @@ export type CumulativeAnalysisData = {
   doctor_personality: string;
 };
 
+export type CustomQuestionData = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  question: string;
+  answer: string;
+  doctor_personality: string;
+};
+
+
 export type Mood = {
   mood: string;
   color: string;

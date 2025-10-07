@@ -2,23 +2,47 @@
 
 import { RootState } from '@/redux/rootReducer';
 import { fetchAllAnalyses } from '@/redux/slices/analysisSlice';
+import { fetchAllCustomQuestions } from '@/redux/slices/customQuestionSlice';
 import { AppDispatch } from '@/redux/store';
 import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+type ViewMode = 'analysis' | 'questions';
+
 const Analysis = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { items, loading, error } = useSelector((state: RootState) => state.analysis);
+  const {
+    items: analysisItems,
+    loading: analysisLoading,
+    error: analysisError,
+  } = useSelector((state: RootState) => state.analysis);
+  const {
+    items: questionItems,
+    loading: questionLoading,
+    error: questionError,
+  } = useSelector((state: RootState) => state.customQuestion);
+
+  const [viewMode, setViewMode] = useState<ViewMode>('analysis');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Get current data based on view mode
+  const currentItems = viewMode === 'analysis' ? analysisItems : questionItems;
+  const loading = viewMode === 'analysis' ? analysisLoading : questionLoading;
+  const error = viewMode === 'analysis' ? analysisError : questionError;
+
   useEffect(() => {
     dispatch(fetchAllAnalyses({ page: 1, pageSize: 100 }));
+    dispatch(fetchAllCustomQuestions({ page: 1, pageSize: 100 }));
   }, [dispatch]);
 
   const handleSearch = () => {
-    dispatch(fetchAllAnalyses({ page: 1, pageSize: 100, search: searchQuery }));
+    if (viewMode === 'analysis') {
+      dispatch(fetchAllAnalyses({ page: 1, pageSize: 100, search: searchQuery }));
+    } else {
+      dispatch(fetchAllCustomQuestions({ page: 1, pageSize: 100, search: searchQuery }));
+    }
     setCurrentIndex(0);
   };
 
@@ -28,8 +52,14 @@ const Analysis = () => {
     }
   };
 
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    setCurrentIndex(0);
+    setSearchQuery('');
+  };
+
   const nextCard = () => {
-    if (currentIndex < items.length - 1) {
+    if (currentIndex < currentItems.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
@@ -43,7 +73,9 @@ const Analysis = () => {
   if (loading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-gray-500">Loading analyses...</div>
+        <div className="text-gray-500">
+          Loading {viewMode === 'analysis' ? 'analyses' : 'questions'}...
+        </div>
       </div>
     );
   }
@@ -56,25 +88,76 @@ const Analysis = () => {
     );
   }
 
-  if (items.length === 0) {
+  if (currentItems.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-gray-500">No analyses found</div>
+      <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+        <div className="text-gray-500">
+          No {viewMode === 'analysis' ? 'analyses' : 'questions'} found
+        </div>
+        {/* View Toggle Buttons */}
+        <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => handleViewChange('analysis')}
+            className={`px-6 py-2 rounded-md font-medium transition-all ${
+              viewMode === 'analysis'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Analyses
+          </button>
+          <button
+            onClick={() => handleViewChange('questions')}
+            className={`px-6 py-2 rounded-md font-medium transition-all ${
+              viewMode === 'questions'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Questions
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="w-full h-full px-4 py-8 flex flex-col items-center">
+      {/* View Toggle Buttons */}
+      <div className="mb-6">
+        <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => handleViewChange('analysis')}
+            className={`px-6 py-2 rounded-md font-medium transition-all ${
+              viewMode === 'analysis'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Analyses ({analysisItems.length})
+          </button>
+          <button
+            onClick={() => handleViewChange('questions')}
+            className={`px-6 py-2 rounded-md font-medium transition-all ${
+              viewMode === 'questions'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Questions ({questionItems.length})
+          </button>
+        </div>
+      </div>
+
       {/* Search Bar */}
-      <div className="w-full max-w-2xl mb-8">
+      {/* <div className="w-full max-w-2xl mb-8">
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Search analyses..."
+            placeholder={`Search ${viewMode === 'analysis' ? 'analyses' : 'questions'}...`}
             className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -84,11 +167,11 @@ const Analysis = () => {
             <IconSearch size={20} />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Card Stack Container */}
       <div className="relative w-full max-w-2xl h-[600px] mb-8">
-        {items.map((item, index) => {
+        {currentItems.map((item, index) => {
           const offset = index - currentIndex;
           const isVisible = Math.abs(offset) <= 2;
 
@@ -123,15 +206,31 @@ const Analysis = () => {
                       {item.doctor_personality || 'General'}
                     </span>
                   </div>
-                  {/* <h2 className="text-2xl font-bold text-gray-900">Dream Analysis</h2> */}
                 </div>
 
-                {/* Analysis Content - Only show on topmost card */}
+                {/* Content - Only show on topmost card */}
                 {offset === 0 && (
                   <div className="prose prose-gray max-w-none">
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {item.analysis}
-                    </p>
+                    {viewMode === 'analysis' ? (
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {'analysis' in item && item.analysis}
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">Question</h3>
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                            {'question' in item && item.question}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">Answer</h3>
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                            {'answer' in item && item.answer}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -151,12 +250,12 @@ const Analysis = () => {
         </button>
 
         <div className="text-gray-600 font-medium min-w-[100px] text-center">
-          {currentIndex + 1} / {items.length}
+          {currentIndex + 1} / {currentItems.length}
         </div>
 
         <button
           onClick={nextCard}
-          disabled={currentIndex === items.length - 1}
+          disabled={currentIndex === currentItems.length - 1}
           className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
           <IconChevronRight size={24} />
