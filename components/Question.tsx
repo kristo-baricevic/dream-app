@@ -36,16 +36,18 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    await dispatch(
-      setSettings({
-        astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
-        occupation: 'Developer',
-        medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
-        personality: 'INTJ',
-        doctorPersonality: 'empathetic',
-      })
-    );
-    const answer = await askQuestion(entries, settings);
+
+    const newSettings = {
+      astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
+      occupation: 'Developer',
+      medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
+      personality: 'INTJ',
+      doctorPersonality: settings.doctorPersonality,
+    };
+
+    dispatch(setSettings(newSettings));
+
+    const answer = await askQuestion(entries, newSettings);
 
     setResponse(answer);
     setValue('');
@@ -62,13 +64,13 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const handleSubmitQuestion = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
-    await dispatch(
+    dispatch(
       setSettings({
         astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
         occupation: 'Developer',
         medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
         personality: 'INTJ',
-        doctorPersonality: 'empathetic',
+        doctorPersonality: settings.doctorPersonality,
       })
     );
     const answer = await askCustomQuestion(value, entries, settings);

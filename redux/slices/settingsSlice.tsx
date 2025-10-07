@@ -41,7 +41,12 @@ const settingsSlice = createSlice({
   initialState,
   reducers: {
     setSettings: (state, action: PayloadAction<Settings>) => {
-      return action.payload;
+      state.astrology = action.payload.astrology;
+      state.occupation = action.payload.occupation;
+      state.medicalHistory = action.payload.medicalHistory;
+      state.personality = action.payload.personality;
+      state.doctorPersonality = action.payload.doctorPersonality;
+      console.log('state ', state);
     },
     setAstrology: (state, action: PayloadAction<Astrology>) => {
       state.astrology = action.payload;

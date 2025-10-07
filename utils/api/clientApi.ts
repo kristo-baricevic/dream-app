@@ -91,7 +91,7 @@ export const askQuestion = async (
 ) => {
   const personalityPrompt = getPersonality(settings.doctorPersonality);
   const URL = local ? `${FAST_API_URL}/qa` : `${API_URL}/fastapi/qa`;
-
+  console.log("settings", settings);
   const res = await fetch(
     new Request(URL, {
       method: 'POST',
