@@ -1,10 +1,14 @@
+import { setDoctorPersonality } from '@/redux/slices/settingsSlice';
+import { AppDispatch } from '@/redux/store';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 const PersonalitySelection = ({ onSelect }: { onSelect: (personality: string) => void }) => {
   const [selectedPersonality, setSelectedPersonality] = useState('academic');
-
+  const dispatch = useDispatch<AppDispatch>();
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
+    dispatch(setDoctorPersonality(selected));
     setSelectedPersonality(selected);
     onSelect(selected);
   };
