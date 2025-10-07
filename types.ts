@@ -25,6 +25,14 @@ export type AnalysisData = {
   sentimentScore: number;
 };
 
+export type CumulativeAnalysisData = {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  analysis: string;
+  doctor_personality: string;
+};
+
 export type Mood = {
   mood: string;
   color: string;
