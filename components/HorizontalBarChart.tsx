@@ -48,20 +48,14 @@ const HorizontalBarChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data 
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis type="number" />
           <YAxis type="category" dataKey="category" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-            }}
-          />
-          <Legend />
+
           <Bar
             dataKey="goodDreams"
             stackId="a"
             fill="#00897B"
             name="Good Dreams"
             radius={[0, 0, 0, 0]}
+            order={1}
           />
           <Bar
             dataKey="badDreams"
@@ -69,6 +63,7 @@ const HorizontalBarChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data 
             fill="#7B1FA2"
             name="Bad Dreams"
             radius={[0, 4, 4, 0]}
+            order={2}
           />
         </BarChart>
       </ResponsiveContainer>

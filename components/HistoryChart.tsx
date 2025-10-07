@@ -73,8 +73,6 @@ const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
           }),
           total_sentiment: entry.sentiment_score,
           count: 1,

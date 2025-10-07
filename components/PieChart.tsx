@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { PieChart, Pie, Cell } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 type AnalysisData = {
+  mood: string;
   color: string;
   sentimentScore: number;
   createdAt: Date;
@@ -19,14 +20,21 @@ const PieChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
         count++;
       }
     }
-    return { name: color, value: count, fill: color };
+    return { name: data.find((d) => d.color === color)?.mood || color, value: count, fill: color };
   });
 
   return (
     <>
       <div className="flex flex-col text-center">
         <h1 className="flex justify-center text-center">Dreams by Color Analysis</h1>
-        <PieChart width={450} height={250}>
+        <PieChart width={350} height={250}>
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+            }}
+          />
           <Pie dataKey="value" data={colorData} nameKey="name" cx="50%" cy="50%" outerRadius={100}>
             {colorData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />

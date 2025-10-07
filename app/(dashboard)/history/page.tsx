@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic';
 
 const History = async () => {
   const { analyses, avg } = await getData();
-  console.log('analysis data ', analyses);
 
   return (
     <div className="w-full h-full bg-pink-100 px-4 py-4">
@@ -16,7 +15,7 @@ const History = async () => {
         <div className="w-full h-full bg-pink-200 px-4 py-4 rounded-lg mt-2">
           <HistoryChart data={analyses} />
         </div>
-        <div className="flex w-full py-5 gap-2 flex-wrap justify-center rounded-lg mt-2 bg-pink-300">
+        <div className="flex w-full py-5 lg:gap-24 gap-8 flex-wrap justify-center rounded-lg mt-2 bg-pink-300">
           <div className="flex py-10 px-2 bg-pink-100 rounded-lg shadow-md">
             <RadarChart data={analyses} />
           </div>
