@@ -1,5 +1,6 @@
 'use client';
 
+import PersonalitySelection from '@/components/PersonalityDropdown';
 import { RootState } from '@/redux/rootReducer';
 import {
   addPhysical,
@@ -16,6 +17,8 @@ import { AppDispatch } from '@/redux/store';
 import { IconCheck, IconEdit, IconX } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Image from 'next/image';
+import DoctorSelection from '@/components/DoctorSelection';
 
 type EditableFieldProps = {
   label: string;
@@ -26,7 +29,6 @@ type EditableFieldProps = {
 const EditableField = ({ label, value, onSave }: EditableFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
-
   const handleSave = () => {
     onSave(tempValue);
     setIsEditing(false);
@@ -84,28 +86,31 @@ const EditableField = ({ label, value, onSave }: EditableFieldProps) => {
 export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();
   const settings = useSelector((state: RootState) => state.settings);
+  const [selectedPersonality, setSelectedPersonality] = useState('Academic');
 
-  const testData = () => {
-    // Set entire settings
-    dispatch(
-      setSettings({
-        astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
-        occupation: 'Developer',
-        medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
-        personality: 'INTJ',
-        doctorPersonality: 'empathetic',
-      })
-    );
+  const handlePersonalitySelect = (personality: string) => {
+    setSelectedPersonality(personality);
+    dispatch(setDoctorPersonality(personality));
   };
 
-  useEffect(() => {
-    testData();
-  }, []);
-
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
       <p className="italic text-gray-500 mb-6">Note: Settings cannot be changed in demo mode.</p>
+
+      {/* Personal Info Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Choose your doctor:</h2>
+        <div className="grid gap-3">
+          <div className="flex justify-center mb-4">
+            <DoctorSelection
+              selectedPersonality={selectedPersonality}
+              onSelect={handlePersonalitySelect}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Astrology Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Astrology</h2>
@@ -141,11 +146,6 @@ export default function Settings() {
             label="Personality Type"
             value={settings.personality}
             onSave={(value) => dispatch(setPersonality(value))}
-          />
-          <EditableField
-            label="Doctor Personality"
-            value={settings.doctorPersonality}
-            onSave={(value) => dispatch(setDoctorPersonality(value))}
           />
         </div>
       </div>

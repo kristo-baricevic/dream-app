@@ -1,14 +1,11 @@
-// components/Question.tsx
-
 'use client';
 
 import { SetStateAction, useState } from 'react';
-import PersonalitySelection from './PersonalityDropdown';
 import Image from 'next/image';
 import { JournalEntry } from '@/types';
 import { RootState } from '@/redux/rootReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSettings } from '@/redux/slices/settingsSlice';
+import { setDoctorPersonality } from '@/redux/slices/settingsSlice';
 import { AppDispatch } from '@/redux/store';
 import { WorkflowViewer } from './WorkflowViewer';
 import { useWorkflowPolling } from '@/utils/hooks/useWorkflowPolling';
@@ -17,6 +14,8 @@ import {
   askCustomQuestionWithWorkflow,
   clearCurrentWorkflow,
 } from '@/redux/slices/workflowSlice';
+import TypewriterText from './TypewriterText';
+import { set } from 'date-fns';
 
 type QuestionProps = {
   entries: JournalEntry[];
@@ -27,58 +26,41 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState('');
   const [isQuestion, setIsQuestion] = useState(false);
-  const [selectedPersonality, setSelectedPersonality] = useState('Academic');
+  const [showButtons, setShowButtons] = useState(false);
   const [workflowId, setWorkflowId] = useState<string | null>(null);
+  const [questionSubmitted, setQuestionSubmitted] = useState<boolean>(false);
 
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch<AppDispatch>();
+  console.log('settings ', settings);
 
-  // Auto-poll workflow when workflowId is set
   useWorkflowPolling(workflowId, (result) => {
     setResponse(result);
     setLoading(false);
   });
 
-  const onChange = (e: { target: { value: SetStateAction<string> } }) => {
-    setValue(e.target.value);
+  const handleImageClick = () => {
+    setShowButtons(!showButtons);
   };
 
-  const handlePersonalitySelect = (personality: string) => {
-    setSelectedPersonality(personality);
-  };
-
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setQuestionSubmitted(true);
     setLoading(true);
     setResponse('');
     setWorkflowId(null);
     dispatch(clearCurrentWorkflow());
 
-    const newSettings = {
-      astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
-      occupation: 'Developer',
-      medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
-      personality: 'INTJ',
-      doctorPersonality: selectedPersonality,
-    };
-
-    dispatch(setSettings(newSettings));
-
     try {
       const result = await dispatch(
         analyzeDreamsWithWorkflow({
           entries,
-          personality: selectedPersonality,
-          settings: newSettings,
+          personality: settings.doctorPersonality,
+          settings,
         })
       ).unwrap();
 
-      console.log('🆕 RECEIVED WORKFLOW RESULT:', result);
-      console.log('🆔 NEW Workflow ID:', result.workflow_id);
-
       setWorkflowId(result.workflow_id);
-
-      console.log('✅ Workflow ID SET to:', result.workflow_id);
     } catch (error) {
       console.error('Analysis failed:', error);
       setLoading(false);
@@ -86,39 +68,30 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
     }
   };
 
-  const handleAskQuestion = async (e: { preventDefault: () => void }) => {
+  const handleAskQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     setIsQuestion(!isQuestion);
   };
 
-  const handleSubmitQuestion = async (e: { preventDefault: () => void }) => {
+  const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
+    setQuestionSubmitted(true);
     setLoading(true);
     setResponse('');
-    setWorkflowId(null); // Clear previous workflow
+    setWorkflowId(null);
     dispatch(clearCurrentWorkflow());
-
-    const newSettings = {
-      astrology: { sun: 'Leo', moon: 'Pisces', rising: 'Virgo' },
-      occupation: 'Developer',
-      medicalHistory: { psychological: ['anxiety'], physical: ['asthma'] },
-      personality: 'INTJ',
-      doctorPersonality: selectedPersonality,
-    };
-
-    dispatch(setSettings(newSettings));
 
     try {
       const result = await dispatch(
         askCustomQuestionWithWorkflow({
           question: value,
           entries,
-          personality: selectedPersonality,
-          settings: newSettings,
+          personality: settings.doctorPersonality,
+          settings,
         })
       ).unwrap();
 
-      setWorkflowId(result.workflow_id); // This will trigger WorkflowViewer to show
+      setWorkflowId(result.workflow_id);
       setValue('');
     } catch (error) {
       console.error('Question failed:', error);
@@ -127,102 +100,134 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
     }
   };
 
+  const onChange = (e: { target: { value: SetStateAction<string> } }) => {
+    setValue(e.target.value);
+  };
   return (
-    <div className="flex flex-col py-4 justify-center align-middle">
-      <div className="flex justify-center mb-4">
-        <PersonalitySelection onSelect={handlePersonalitySelect} />
-      </div>
+    <div className="flex justify-center items-center flex-row py-6 w-full">
+      {settings.doctorImage ? (
+        <div className="flex">
+          <div className="flex">
+            <div className="relative flex cursor-pointer group" onClick={handleImageClick}>
+              <Image
+                src={settings.doctorImage}
+                alt={settings.doctorPersonality}
+                height={220}
+                width={220}
+                className="rounded-lg transition-transform group-hover:scale-105"
+              />
 
-      <div className="flex flex-wrap justify-center align-middle">
-        <div className="flex flex-wrap px-2 py-2">
-          <form onSubmit={handleSubmit}>
-            <div className="flex px-2">
-              <button
-                disabled={loading}
-                type="submit"
-                className="bg-pink-400 px-4 py-2 rounded-2xl text-lg ml-5 shadow-xl border-solid border-2 border-black transition duration-300 ease-in-out hover:bg-pink-500 hover:text-white disabled:opacity-50"
-              >
-                Get your analysis!
-              </button>
+              {!showButtons && !questionSubmitted && (
+                <div className="flex mt-4 justify-center top-10 bg-white border-2 border-black rounded-2xl w-[300px] h-[150px] p-4 shadow-lg">
+                  <p className="mt-4 font-medium text-gray-800 text-sm leading-snug">
+                    <TypewriterText text="Welcome to the Dream App! Click on me to have your dreams analyzed, or add a dream to log your sleepy adventures." />
+                  </p>
+                </div>
+              )}
             </div>
-          </form>
-        </div>
 
-        <div className="flex flex-col px-2 py-2">
-          <form onSubmit={handleAskQuestion}>
-            <div className="flex px-2">
-              <button
-                disabled={loading}
-                type="submit"
-                className="bg-purple-400 px-4 py-2 rounded-2xl text-lg ml-5 shadow-xl border-solid border-2 border-black transition duration-300 ease-in-out hover:bg-purple-500 hover:text-white disabled:opacity-50"
-              >
-                Ask a question!
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+            <style jsx>{`
+              @keyframes typing {
+                from {
+                  width: 0;
+                }
+                to {
+                  width: 100%;
+                }
+              }
 
-      <div className="flex py-2 align-middle justify-center">
-        {isQuestion && (
-          <div className="flex flex-wrap justify-start">
-            <form onSubmit={handleSubmitQuestion}>
-              <div className="flex py-2 align-middle justify-center">
-                <input
-                  disabled={loading}
-                  onChange={onChange}
-                  value={value}
-                  type="text"
-                  placeholder="ask a question"
-                  className="border border-black/20 px-4 py-2 text-lg rounded-lg shadow-lg"
-                />
-              </div>
-              <div className="flex py-2 align-middle justify-center">
+              .animate-typing {
+                animation: typing 4s steps(100, end) 1;
+              }
+            `}</style>
+          </div>
+
+          {showButtons && !isQuestion && !questionSubmitted && (
+            <div className="flex justify-center items-center mt-6 w-full">
+              <form onSubmit={handleSubmit}>
                 <button
                   disabled={loading}
                   type="submit"
-                  className="bg-purple-300 px-4 py-2 rounded-2xl text-lg ml-5 shadow-xl border-solid border-2 border-black transition duration-300 ease-in-out hover:bg-purple-500 hover:text-white disabled:opacity-50"
+                  className="bg-pink-400 w-[180px] px-4 py-2 rounded-2xl text-lg mx-2 shadow-xl border-2 border-black transition duration-300 hover:bg-pink-500 hover:text-white disabled:opacity-50"
                 >
-                  Submit!
+                  Get your analysis!
                 </button>
-              </div>
-            </form>
-          </div>
-        )}
-      </div>
-
-      <div className="py-2">
-        {/* {loading && (
-          <div className="spinner-overlay">
-            <Image
-              src="/spinner.gif"
-              alt="Loading..."
-              height="100"
-              width="100"
-              unoptimized={true}
-            />
-            <p>...The doctor is thinking. This may take a moment!</p>
-          </div>
-        )} */}
-
-        {/* Show workflow viewer when we have a workflowId */}
-        {workflowId && (
-          <div className="px-2 py-4">
-            <div className="bg-white p-4 rounded-2xl border-solid border-2 border-blue-300 shadow-lg">
-              <WorkflowViewer />
-            </div>
-          </div>
-        )}
-
-        {/* Show final response */}
-        <div className="px-2 py-6 font-serif">
-          {response && (
-            <div className="bg-slate-100 p-4 rounded-2xl border-solid border-2 border-blue-300 shadow-lg">
-              <p>{response}</p>
+              </form>
+              <form onSubmit={handleAskQuestion}>
+                <button
+                  disabled={loading}
+                  type="submit"
+                  className="bg-purple-400 w-[180px] px-4 py-2 rounded-2xl text-lg mx-2 shadow-xl border-2 border-black transition duration-300 hover:bg-purple-500 hover:text-white disabled:opacity-50"
+                >
+                  Ask a question!
+                </button>
+              </form>
             </div>
           )}
         </div>
-      </div>
+      ) : (
+        <p className="text-gray-500 italic">Select your doctor first.</p>
+      )}
+
+      {isQuestion && !questionSubmitted && (
+        <div className="flex justify-center items-center mt-6">
+          <form onSubmit={handleSubmitQuestion} className="flex flex-col items-center gap-2">
+            <input
+              disabled={loading}
+              onChange={onChange}
+              value={value}
+              type="text"
+              placeholder="ask a question"
+              className="flex border border-black/20 px-4 py-2 text-lg rounded-lg shadow-lg w-[300px]"
+            />
+            <div className="flex flex-row">
+              <button
+                disabled={loading}
+                onClick={() => setIsQuestion(false)}
+                type="button"
+                className="bg-red-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-red-500 hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={loading}
+                type="submit"
+                className="bg-purple-300 px-4 py-2 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-purple-500 hover:text-white disabled:opacity-50"
+              >
+                Submit!
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {questionSubmitted && (
+        <div className="flex flex-col items-center justify-center">
+          {workflowId && (
+            <div className="flex px-2 py-4 w-full max-w-3xl">
+              <div className="bg-white p-4 rounded-2xl border-2 border-blue-300 shadow-lg">
+                <WorkflowViewer response={response} />
+              </div>
+            </div>
+          )}
+
+          {response && (
+            <div className="flex px-2 py-6 font-serif max-w-3xl">
+              <div className="bg-slate-100 p-4 rounded-2xl border-2 border-blue-300 shadow-lg">
+                <p>{response}</p>
+              </div>
+            </div>
+          )}
+          <button
+            disabled={loading}
+            onClick={() => setQuestionSubmitted(false)}
+            type="button"
+            className="bg-red-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-red-500 hover:text-white disabled:opacity-50"
+          >
+            Clear
+          </button>
+        </div>
+      )}
     </div>
   );
 };

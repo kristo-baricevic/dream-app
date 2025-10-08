@@ -17,23 +17,33 @@ export type Settings = {
   medicalHistory: MedicalHistory;
   personality: string;
   doctorPersonality: string;
+  doctorImage: string;
 };
 
 type SettingsState = Settings;
 
 const initialState: SettingsState = {
   astrology: {
-    sun: '',
-    moon: '',
-    rising: '',
+    sun: 'Leo',
+    moon: 'Pisces',
+    rising: 'Virgo',
   },
-  occupation: '',
+  occupation: 'Developer',
   medicalHistory: {
-    psychological: [],
-    physical: [],
+    psychological: ['anxiety'],
+    physical: ['asthma'],
   },
-  personality: '',
-  doctorPersonality: '',
+  personality: 'INTJ',
+  doctorPersonality: 'Academic',
+  doctorImage: '/owl_images/owl1.png',
+};
+
+const doctorImages: Record<string, string> = {
+  Academic: '/owl_images/owl1.png',
+  Mystical: '/owl_images/owl2.png',
+  Artistic: '/owl_images/owl3.png',
+  Compassionate: '/owl_images/owl4.png',
+  Scientific: '/owl_images/owl5.png',
 };
 
 const settingsSlice = createSlice({
@@ -46,6 +56,7 @@ const settingsSlice = createSlice({
       state.medicalHistory = action.payload.medicalHistory;
       state.personality = action.payload.personality;
       state.doctorPersonality = action.payload.doctorPersonality;
+      state.doctorImage = action.payload.doctorImage;
     },
     setAstrology: (state, action: PayloadAction<Astrology>) => {
       state.astrology = action.payload;
@@ -64,6 +75,7 @@ const settingsSlice = createSlice({
     },
     setDoctorPersonality: (state, action: PayloadAction<string>) => {
       state.doctorPersonality = action.payload;
+      state.doctorImage = doctorImages[action.payload] || '';
     },
     addPsychological: (state, action: PayloadAction<string>) => {
       state.medicalHistory.psychological.push(action.payload);
