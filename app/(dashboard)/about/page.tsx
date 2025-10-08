@@ -25,6 +25,9 @@ const About = async () => {
           real-time analysis through asynchronous processing and maintains data persistence with
           PostgreSQL.
         </div>
+        <div className="text-gray-700 leading-relaxed">
+          Credit: Owl images were sourced from www.freevector.com
+        </div>
       </div>
     </div>
   );
