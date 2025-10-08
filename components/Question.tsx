@@ -32,7 +32,6 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
 
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch<AppDispatch>();
-  console.log('settings ', settings);
 
   useWorkflowPolling(workflowId, (result) => {
     setResponse(result);

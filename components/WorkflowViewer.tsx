@@ -23,7 +23,6 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
 
   useEffect(() => {
     if (!response) return;
-    console.log('response', response);
     setCollapsed(true);
   }, [response]);
 
