@@ -22,7 +22,6 @@ const Editor = ({ entry }: any) => {
   const [value, setValue] = useState(entry?.content);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(entry?.analysis || {});
-  const [personality, setPersonality] = useState('academic');
   const [mood, setMood] = useState<EmotionType>('Joy');
   const settings = useSelector((state: RootState) => state.settings);
   const { mood: analysisMood, summary, color, interpretation, subject, negative } = analysis || {};
@@ -38,7 +37,7 @@ const Editor = ({ entry }: any) => {
       : [];
 
   const { entries, loading } = useSelector((s: RootState) => s.journal);
-
+  console.log('analysis data ', analysis);
   useEffect(() => {
     if (!entries || entries.length === 0) {
       dispatch(fetchEntries({ pageSize: 100 }));

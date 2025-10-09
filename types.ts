@@ -23,6 +23,13 @@ export type AnalysisData = {
   negative: boolean;
   subject: string;
   sentimentScore: number;
+  doctor_personality: string;
+  weights: {
+    astrology: number;
+    personality: number;
+    medicalHistory: number;
+    theory: number;
+  };
 };
 
 export type CumulativeAnalysisData = {
