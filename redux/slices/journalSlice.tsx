@@ -141,13 +141,13 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
 
 export const updateEntryThunk = createAsyncThunk<
   JournalEntry,
-  { id: string; content: string; personality: string; mood: EmotionType }
->('journal/updateEntry', async ({ id, content, personality, mood }) => {
+  { id: string; content: string; mood: EmotionType; settings: Record<string, any> }
+>('journal/updateEntry', async ({ id, content, mood, settings }) => {
   const res = await fetch(`${API_URL}/api/entries/${id}/update/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ content, personality, mood }),
+    body: JSON.stringify({ content, mood, settings }),
   });
 
   if (!res.ok) {

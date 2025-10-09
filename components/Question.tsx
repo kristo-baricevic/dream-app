@@ -56,7 +56,6 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
       const result = await dispatch(
         analyzeDreamsWithWorkflow({
           entries,
-          personality: settings.doctorPersonality,
           settings,
         })
       ).unwrap();
@@ -87,7 +86,6 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
         askCustomQuestionWithWorkflow({
           question: value,
           entries,
-          personality: settings.doctorPersonality,
           settings,
         })
       ).unwrap();

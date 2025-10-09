@@ -1,6 +1,6 @@
 'use client';
 
-import PersonalitySelection from '@/components/PersonalityDropdown';
+import InfluenceDial from '@/components/InfluenceDial';
 import { RootState } from '@/redux/rootReducer';
 import {
   addPhysical,
@@ -12,6 +12,7 @@ import {
   setPersonality,
   setDoctorPersonality,
   setSettings,
+  setInfluence,
 } from '@/redux/slices/settingsSlice';
 import { AppDispatch } from '@/redux/store';
 import { IconCheck, IconEdit, IconX } from '@tabler/icons-react';
@@ -96,7 +97,9 @@ export default function Settings() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
-      <p className="italic text-gray-500 mb-6">Note: Settings cannot be changed in demo mode.</p>
+      <p className="italic text-gray-500 mb-6">
+        These settings act as weights for the context the LLM uses to analyze your dreams.
+      </p>
 
       {/* Personal Info Section */}
       <div className="mb-8">
@@ -114,6 +117,11 @@ export default function Settings() {
       {/* Astrology Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Astrology</h2>
+        <InfluenceDial
+          label="Influence"
+          value={settings.influence.astrology}
+          onChange={(v) => dispatch(setInfluence({ field: 'astrology', value: v }))}
+        />
         <div className="grid gap-3">
           <EditableField
             label="Sun Sign"
@@ -136,6 +144,12 @@ export default function Settings() {
       {/* Personal Info Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Personal Information</h2>
+        <InfluenceDial
+          label="Influence"
+          value={settings.influence.personality}
+          onChange={(v) => dispatch(setInfluence({ field: 'personality', value: v }))}
+        />
+
         <div className="grid gap-3">
           <EditableField
             label="Occupation"
@@ -153,7 +167,11 @@ export default function Settings() {
       {/* Medical History Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Medical History</h2>
-
+        <InfluenceDial
+          label="Influence"
+          value={settings.influence.medicalHistory}
+          onChange={(v) => dispatch(setInfluence({ field: 'medicalHistory', value: v }))}
+        />
         <div className="mb-4">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Psychological</h3>
           <div className="flex flex-wrap gap-2">

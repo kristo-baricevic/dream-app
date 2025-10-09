@@ -31,6 +31,12 @@ export type CumulativeAnalysisData = {
   updated_at: Date;
   analysis: string;
   doctor_personality: string;
+  weights: {
+    astrology: number;
+    personality: number;
+    medicalHistory: number;
+    theory: number;
+  };
 };
 
 export type CustomQuestionData = {
@@ -40,6 +46,12 @@ export type CustomQuestionData = {
   question: string;
   answer: string;
   doctor_personality: string;
+  weights: {
+    astrology: number;
+    personality: number;
+    medicalHistory: number;
+    theory: number;
+  };
 };
 
 

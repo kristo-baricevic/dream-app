@@ -58,7 +58,7 @@ const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
 
 export const analyzeDreamsWithWorkflow = createAsyncThunk(
   'workflow/analyzeDreams',
-  async (params: { entries: any[]; personality?: string; settings?: any }) => {
+  async (params: { entries: any[]; settings?: any }) => {
     const URL = local ? `${FAST_API_URL}/qa-with-workflow` : `${API_URL}/fastapi/qa-with-workflow`;
     console.log('🔍 Starting workflow request...');
 
@@ -79,7 +79,7 @@ export const analyzeDreamsWithWorkflow = createAsyncThunk(
 
 export const askCustomQuestionWithWorkflow = createAsyncThunk(
   'workflow/askQuestion',
-  async (params: { question: string; entries: any[]; personality?: string; settings?: any }) => {
+  async (params: { question: string; entries: any[]; settings?: any }) => {
     const URL = local
       ? `${FAST_API_URL}/custom-question-with-workflow`
       : `${API_URL}/fastapi/custom-question-with-workflow`;

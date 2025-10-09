@@ -24,7 +24,7 @@ const Editor = ({ entry }: any) => {
   const [analysis, setAnalysis] = useState(entry?.analysis || {});
   const [personality, setPersonality] = useState('academic');
   const [mood, setMood] = useState<EmotionType>('Joy');
-
+  const settings = useSelector((state: RootState) => state.settings);
   const { mood: analysisMood, summary, color, interpretation, subject, negative } = analysis || {};
   const analysisData =
     analysis && Object.keys(analysis).length > 0
@@ -70,8 +70,8 @@ const Editor = ({ entry }: any) => {
         updateEntryThunk({
           id: entry.id,
           content: value,
-          personality,
           mood,
+          settings,
         })
       ).unwrap();
 

@@ -15,8 +15,9 @@ const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
 export const updatedEntry = async (
   id: string,
   content: string,
-  personality: string,
-  mood: EmotionType
+  // personality: string,
+  mood: EmotionType,
+  settings: Settings,
 ) => {
   try {
     const response = await fetch(
@@ -25,7 +26,7 @@ export const updatedEntry = async (
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content, personality, mood }),
+        body: JSON.stringify({ content, mood, settings }),
       })
     );
 

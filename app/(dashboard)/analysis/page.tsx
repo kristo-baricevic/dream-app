@@ -121,6 +121,8 @@ const Analysis = () => {
     );
   }
 
+  console.log('analysisItems', analysisItems);
+
   return (
     <div className="w-full h-full px-4 py-8 flex flex-col items-center">
       {/* View Toggle Buttons */}
@@ -193,8 +195,8 @@ const Analysis = () => {
               }}
             >
               <div className="bg-white rounded-xl shadow-2xl p-8 border border-gray-200 h-[600px] overflow-y-auto">
-                <div className="mb-6 pb-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-200">
+                  <div>
                     <p className="text-sm text-gray-500">
                       {new Date(item.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -202,9 +204,31 @@ const Analysis = () => {
                         day: 'numeric',
                       })}
                     </p>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                      {item.doctor_personality || 'General'}
-                    </span>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500">Doctor:</span>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        {item.doctor_personality || 'General'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {[
+                        ['Theory', item.weights.theory],
+                        ['Astrology', item.weights.astrology],
+                        ['Personality', item.weights.personality],
+                        ['Medical', item.weights.medicalHistory],
+                      ].map(([label, value]) => (
+                        <span
+                          key={label}
+                          className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-[10px] font-medium"
+                        >
+                          {label}: {Number(value).toFixed(2)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

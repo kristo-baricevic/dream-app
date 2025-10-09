@@ -18,6 +18,12 @@ export type Settings = {
   personality: string;
   doctorPersonality: string;
   doctorImage: string;
+  influence: {
+    astrology: number;
+    personality: number;
+    medicalHistory: number;
+    doctor: number;
+  };
 };
 
 type SettingsState = Settings;
@@ -36,6 +42,12 @@ const initialState: SettingsState = {
   personality: 'INTJ',
   doctorPersonality: 'Academic',
   doctorImage: '/owl_images/owl1.png',
+  influence: {
+    astrology: 0.15,
+    personality: 0.15,
+    medicalHistory: 0.1,
+    doctor: 0.7,
+  },
 };
 
 const doctorImages: Record<string, string> = {
@@ -98,6 +110,12 @@ const settingsSlice = createSlice({
     setMedicalHistory: (state, action: PayloadAction<MedicalHistory>) => {
       state.medicalHistory = action.payload;
     },
+    setInfluence: (
+      state,
+      action: PayloadAction<{ field: keyof Settings['influence']; value: number }>
+    ) => {
+      state.influence[action.payload.field] = action.payload.value;
+    },
     resetSettings: () => initialState,
   },
 });
@@ -117,6 +135,7 @@ export const {
   updatePhysical,
   setMedicalHistory,
   resetSettings,
+  setInfluence,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
