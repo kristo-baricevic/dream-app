@@ -5,7 +5,7 @@ import { EmotionType } from '@/utils/parameters/emotions';
 import next from 'next';
 import { RootState } from '../rootReducer';
 
-const local = true;
+const local = false;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;

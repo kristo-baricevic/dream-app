@@ -17,6 +17,7 @@ const Analysis = () => {
     loading: analysisLoading,
     error: analysisError,
   } = useSelector((state: RootState) => state.analysis);
+
   const {
     items: questionItems,
     loading: questionLoading,
