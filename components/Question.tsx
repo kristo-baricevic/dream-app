@@ -16,6 +16,7 @@ import {
 } from '@/redux/slices/workflowSlice';
 import TypewriterText from './TypewriterText';
 import { set } from 'date-fns';
+import useIsSmallScreen from '@/utils/isSmallScreen';
 
 type QuestionProps = {
   entries: JournalEntry[];
@@ -29,6 +30,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [workflowId, setWorkflowId] = useState<string | null>(null);
   const [questionSubmitted, setQuestionSubmitted] = useState<boolean>(false);
+  const isSmallScreen = useIsSmallScreen();
 
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch<AppDispatch>();
@@ -102,23 +104,28 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const onChange = (e: { target: { value: SetStateAction<string> } }) => {
     setValue(e.target.value);
   };
-  return (
-    <div className="flex justify-center items-center flex-row py-6 w-full">
-      {settings.doctorImage ? (
-        <div className="flex">
-          <div className="flex">
-            <div className="relative flex cursor-pointer group" onClick={handleImageClick}>
-              <Image
-                src={settings.doctorImage}
-                alt={settings.doctorPersonality}
-                height={220}
-                width={220}
-                className="rounded-lg transition-transform group-hover:scale-105"
-              />
 
+  return (
+    <div className="flex justify-center items-center flex-col py-6 w-full">
+      {settings.doctorImage ? (
+        <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-col">
+            <div
+              className="relative flex flex-col sm:flex-row items-center cursor-pointer group"
+              onClick={handleImageClick}
+            >
+              <>
+                <Image
+                  src={settings.doctorImage}
+                  alt={settings.doctorPersonality}
+                  height={220}
+                  width={220}
+                  className="flex object-cover rounded-lg transition-transform group-hover:scale-105"
+                />
+              </>
               {!showButtons && !questionSubmitted && (
-                <div className="flex mt-4 justify-center top-10 bg-white border-2 border-black rounded-2xl w-[300px] h-[150px] p-4 shadow-lg">
-                  <p className="mt-4 font-medium text-gray-800 text-sm leading-snug">
+                <div className="flex mt-4 justify-center top-10 bg-white min-h-[130px] max-w-[300px] border-2 border-black w-full rounded-2xl sm:h-[100px] p-4 shadow-lg">
+                  <p className="mt-2 font-medium text-gray-800 text-sm leading-snug">
                     <TypewriterText text="Welcome to the Dream App! Click on me to have your dreams analyzed, or add a dream to log your sleepy adventures." />
                   </p>
                 </div>
@@ -204,15 +211,15 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
         <div className="flex flex-col items-center justify-center">
           {workflowId && (
             <div className="flex px-2 py-4 w-full max-w-3xl">
-              <div className="bg-white p-4 rounded-2xl border-2 border-blue-300 shadow-lg">
+              <div className="bg-slate-100 p-4 w-full rounded-2xl border-2 border-blue-300 shadow-lg">
                 <WorkflowViewer response={response} />
               </div>
             </div>
           )}
 
           {response && (
-            <div className="flex px-2 py-6 font-serif max-w-3xl">
-              <div className="bg-slate-100 p-4 rounded-2xl border-2 border-blue-300 shadow-lg">
+            <div className="flex px-2 py-6 font-serif max-w-3xl max-h-[500px] ">
+              <div className="bg-slate-100 p-4 rounded-2xl border-2 border-blue-300 shadow-lg overflow-y-auto">
                 <p>{response}</p>
               </div>
             </div>

@@ -45,7 +45,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
 };
 
 const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('day');
+  const [viewMode, setViewMode] = useState<ViewMode>('week');
 
   const formatPeriod = (date: Date, mode: ViewMode): string => {
     switch (mode) {
@@ -127,9 +127,9 @@ const HistoryChart: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
 
   return (
     <div className="px-4">
-      <div className="flex font-semibold justify-between items-center mb-4">
+      <div className="flex sm:flex-row flex-col font-semibold justify-between items-center mb-4">
         <h1 className="text-xl">Sentiment Analysis</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 sm:mt-0 mt-2">
           <button
             onClick={() => setViewMode('day')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

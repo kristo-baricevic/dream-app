@@ -35,7 +35,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
   return (
     <div className="workflow-viewer space-y-4">
       {/* Header */}
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-slate-100 p-4 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold">{workflow.routine_name}</h3>
@@ -47,7 +47,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-sm px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            className="bg-white text-sm px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-300 transition"
           >
             {collapsed ? 'Expand Viewer' : 'Collapse Viewer'}
           </button>

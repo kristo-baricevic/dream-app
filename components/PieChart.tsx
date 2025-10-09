@@ -25,7 +25,7 @@ const PieChartComponent: React.FC<{ data: AnalysisData[] }> = ({ data }) => {
 
   return (
     <>
-      <div className="flex flex-col text-center">
+      <div className="flex w-full justify-center items-center flex-col text-center">
         <h1 className="flex justify-center text-center">Dreams by Color Analysis</h1>
         <PieChart width={350} height={250}>
           <Tooltip
