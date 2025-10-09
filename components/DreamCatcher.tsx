@@ -81,7 +81,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   if (layout === 'list') {
     return (
-      <div className="flex flex-col gap-4 p-4 mt-6">
+      <div className="flex flex-col gap-4 p-4 mt-[60px]">
         {entries.map((entry) => (
           <ExpandedEntryCard
             key={entry.id}
@@ -106,7 +106,7 @@ const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, lay
 
   if (layout === 'grid') {
     return (
-      <div className="flex flex-wrap gap-4 p-4 mt-6 justify-center">
+      <div className="flex flex-wrap gap-4 p-4 mt-[60px] justify-center">
         {entries.map((entry) => (
           <ExpandedEntryCard
             key={entry.id}

@@ -124,7 +124,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
                 />
               </>
               {!showButtons && !questionSubmitted && (
-                <div className="flex mt-4 justify-center top-10 bg-white min-h-[130px] max-w-[300px] border-2 border-black w-full rounded-2xl sm:h-[100px] p-4 shadow-lg">
+                <div className="flex mt-4 justify-center top-10 bg-white min-h-[130px] w-[300px] border-2 border-black rounded-2xl sm:h-[100px] p-4 shadow-lg">
                   <p className="mt-2 font-medium text-gray-800 text-sm leading-snug">
                     <TypewriterText text="Welcome to the Dream App! Click on me to have your dreams analyzed, or add a dream to log your sleepy adventures." />
                   </p>
