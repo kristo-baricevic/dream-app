@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import EntryCard from './EntryCard';
-import { JournalEntry } from '@/types';
+import { AnalysisData, JournalEntry } from '@/types';
 import ExpandedEntryCard from './ExpandedEntryCard';
 import useIsSmallScreen from '@/utils/isSmallScreen';
 import useIsMobile from '@/utils/isMobile';
@@ -19,7 +19,7 @@ type DreamCatcherProps = {
   layout: string;
 };
 
-const initAnalysis = {
+const initAnalysis: AnalysisData = {
   id: '',
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -32,6 +32,13 @@ const initAnalysis = {
   negative: false,
   subject: '',
   sentimentScore: 0,
+  doctor_personality: '',
+  weights: {
+    astrology: 0,
+    personality: 0,
+    medicalHistory: 0,
+    theory: 0,
+  },
 };
 
 const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, layout }) => {
