@@ -20,6 +20,7 @@ type PaginatedResponse = {
   previous: string | null;
   results: CumulativeAnalysisData[];
 };
+
 type SearchParams = {
   page?: number;
   pageSize?: number;

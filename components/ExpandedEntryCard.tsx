@@ -66,6 +66,7 @@ const ExpandedEntryCard = ({
   const isMobile = useIsMobile();
   const isSmallScreen = useIsSmallScreen();
   const cloudStyle = { background: lightenColor(dreamAnalysis?.color, 13) };
+  const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
   return (
     <div
@@ -93,6 +94,10 @@ const ExpandedEntryCard = ({
                   <div className="font-serif transition-opacity duration-300">
                     <span className="font-bold">Mood: </span>
                     {dreamAnalysis?.mood}
+                  </div>
+                  <div className="font-serif transition-opacity duration-300">
+                    <span className="font-bold">Symbols: </span>
+                    {normalizeSymbolText(dreamAnalysis?.symbols)}
                   </div>
                   <div className="font-serif transition-opacity duration-300">
                     <span className="font-bold">Analysis: </span>

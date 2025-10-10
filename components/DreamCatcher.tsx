@@ -39,6 +39,7 @@ const initAnalysis: AnalysisData = {
     medicalHistory: 0,
     theory: 0,
   },
+  symbols: [],
 };
 
 const DreamCatcher: React.FC<DreamCatcherProps> = ({ entries, onDeleteEntry, layout }) => {

@@ -24,13 +24,25 @@ const Editor = ({ entry }: any) => {
   const [analysis, setAnalysis] = useState(entry?.analysis || {});
   const [mood, setMood] = useState<EmotionType>('Joy');
   const settings = useSelector((state: RootState) => state.settings);
-  const { mood: analysisMood, summary, color, interpretation, subject, negative } = analysis || {};
+  const {
+    mood: analysisMood,
+    summary,
+    color,
+    interpretation,
+    symbols,
+    subject,
+    negative,
+  } = analysis || {};
+
+  const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
+
   const analysisData =
     analysis && Object.keys(analysis).length > 0
       ? [
           { name: 'Summary', value: summary },
           { name: 'Title', value: subject },
           { name: 'Mood', value: analysisMood },
+          { name: 'Symbols', value: normalizeSymbolText(symbols) },
           { name: 'Good or Bad Dream', value: negative ? 'Bad 😔' : 'Good 🙂' },
           { name: 'Analysis', value: interpretation },
         ]

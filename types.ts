@@ -30,6 +30,7 @@ export type AnalysisData = {
     medicalHistory: number;
     theory: number;
   };
+  symbols: string[];
 };
 
 export type CumulativeAnalysisData = {
