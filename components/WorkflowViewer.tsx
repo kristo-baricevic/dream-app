@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   selectCurrentWorkflow,
   selectExpandedSteps,
@@ -20,44 +20,64 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
   const workflow = useSelector(selectCurrentWorkflow);
   const expandedSteps = useSelector(selectExpandedSteps);
   const [collapsed, setCollapsed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!response) return;
     setCollapsed(true);
   }, [response]);
 
+  // Auto-scroll to latest step when running
+  useEffect(() => {
+    if (workflow?.status === 'running' && containerRef.current) {
+      const latestStepElement = containerRef.current.lastElementChild;
+      if (latestStepElement) {
+        latestStepElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [workflow?.steps.length]);
+
   if (!workflow) {
     return <div className="p-4 text-gray-500">No workflow data</div>;
   }
 
   const isStepExpanded = (stepId: string) => expandedSteps.includes(stepId);
+  const isCompleted = workflow.status === 'completed';
+
+  // While running, show only the latest completed or running step
+  const visibleSteps = workflow.status === 'running' ? workflow.steps.slice(-1) : workflow.steps;
 
   return (
     <div className="workflow-viewer space-y-4">
       {/* Header */}
-      <div className="bg-slate-100 p-4 rounded-lg">
+      <div className="bg-slate-100 min-w-[286px] sm:p-4 p-0 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">{workflow.routine_name}</h3>
+            <h3 className="sm:text-lg text-md font-semibold">{workflow.routine_name}</h3>
             <p className="text-sm text-gray-600">
-              {workflow.status === 'running' && '⏳ Analysis in progress...'}
-              {workflow.status === 'completed' && '✅ Analysis complete'}
-              {workflow.status === 'failed' && '❌ Analysis failed'}
+              {workflow.status === 'running' && ' ⏳ Analysis in progress...'}
+              {workflow.status === 'completed' && ' ✅ Analysis complete'}
+              {workflow.status === 'failed' && ' ❌ Analysis failed'}
             </p>
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="bg-white text-sm px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-300 transition"
+            className="bg-white sm:text-sm text-xs px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-300 transition"
           >
-            {collapsed ? 'Expand Viewer' : 'Collapse Viewer'}
+            {collapsed ? 'Expand ' : 'Collapse '}
           </button>
         </div>
       </div>
+
       {!collapsed && (
         <>
-          {/* Steps */}
-          <div className="space-y-3">
-            {workflow.steps.map((step, index) => (
+          {/* Scrollable Steps Container */}
+          <div
+            ref={containerRef}
+            className={`overflow-y-auto ${isCompleted ? 'max-h-[300px]' : 'max-h-[200px]'} space-y-3 border rounded-lg p-4 bg-white`}
+            style={{ scrollbarWidth: 'thin' }}
+          >
+            {visibleSteps.map((step, index) => (
               <div key={step.id} className="border rounded-lg overflow-hidden">
                 <div
                   className="p-4 bg-white cursor-pointer hover:bg-gray-50 transition-colors"
@@ -123,12 +143,10 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
               </div>
             ))}
           </div>
+
           {/* Final Result */}
           {workflow.status === 'completed' && workflow.final_result && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              {/* <h3 className="font-semibold mb-2">Interpretation</h3>
-          <p className="text-gray-800 whitespace-pre-wrap">{workflow.final_result}</p> */}
-
+            <div className="mt-6 p-2 rounded-lg">
               {workflow.overall_confidence && (
                 <div className="text-sm text-gray-600 mt-3">
                   Confidence: {(workflow.overall_confidence * 100).toFixed(0)}%

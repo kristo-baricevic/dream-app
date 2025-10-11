@@ -125,8 +125,6 @@ const Analysis = () => {
     );
   }
 
-  console.log('analysisItems', analysisItems);
-
   return (
     <div className="w-full h-full px-4 py-8 flex flex-col items-center">
       {/* View Toggle Buttons */}
@@ -214,7 +212,7 @@ const Analysis = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">Doctor:</span>
                       <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                        {item.doctor_personality || 'General'}
+                        {item.doctor_personality || 'Academic'}
                       </span>
                     </div>
 

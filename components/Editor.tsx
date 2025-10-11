@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { deleteEntry } from '@/utils/api/clientApi';
-import PersonalitySelection from './PersonalityDropdown';
-import { getPersonality } from '@/utils/parameters/personalities';
 import { EmotionType } from '@/utils/parameters/emotions';
 import { moodObject } from '@/constants/moodObject';
 import { dreamTopics } from '@/constants/dreamTopic';
 import { fetchEntries, updateEntryThunk } from '@/redux/slices/journalSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
+import { IconChevronLeft, IconChevronRight, IconSparkles, IconTrash } from '@tabler/icons-react';
 import { RootState } from '@/redux/rootReducer';
+import BasicModal from './BasicModal';
+import ReactDOM from 'react-dom';
 
 const Editor = ({ entry }: any) => {
   const router = useRouter();
@@ -36,20 +36,10 @@ const Editor = ({ entry }: any) => {
 
   const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
-  const analysisData =
-    analysis && Object.keys(analysis).length > 0
-      ? [
-          { name: 'Summary', value: summary },
-          { name: 'Title', value: subject },
-          { name: 'Mood', value: analysisMood },
-          { name: 'Symbols', value: normalizeSymbolText(symbols) },
-          { name: 'Good or Bad Dream', value: negative ? 'Bad 😔' : 'Good 🙂' },
-          { name: 'Analysis', value: interpretation },
-        ]
-      : [];
+  const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
   const { entries, loading } = useSelector((s: RootState) => s.journal);
-  console.log('analysis data ', analysis);
+
   useEffect(() => {
     if (!entries || entries.length === 0) {
       dispatch(fetchEntries({ pageSize: 100 }));
@@ -122,121 +112,215 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
+      return;
+    }
+
     try {
-      const res = await deleteEntry(entry.id);
-      router.push('/');
+      await deleteEntry(entry.id);
+      router.push('/journal');
     } catch (error) {
       console.error('Failed to delete entry:', error);
     }
   };
 
   return (
-    <div className="px-4 py-4">
-      <div className="flex flex-col">
-        <div className="col-span-3 px-4">
-          <div className="py-4">
-            <form>
-              <div className="relative flex items-center w-full py-2">
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  disabled={!prevEntry || loading}
-                  className="absolute left-0 p-2 rounded-full border bg-pink-300 border-black/50 hover:bg-pink-500 hover:text-white disabled:opacity-40"
-                  aria-label="Previous entry"
-                  title="Previous entry"
-                >
-                  <IconArrowLeft />
-                </button>
+    <div className="w-full h-full px-4 py-8 flex flex-col items-center">
+      {/* Card Container */}
+      <div className="relative w-full max-w-4xl mb-8">
+        {/* Background shadow cards for visual depth */}
+        <div
+          className="absolute w-full transition-all duration-300"
+          style={{
+            transform: 'translateX(20px) translateY(20px) scale(0.95)',
+            zIndex: 1,
+            opacity: 0.3,
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 h-[700px]" />
+        </div>
 
-                <div className="mx-auto flex items-center">
-                  <button
-                    onClick={handleSubmit}
-                    type="submit"
-                    className="bg-pink-400 px-4 py-2 rounded-2xl text-md shadow-xl border-2 border-black transition duration-300 ease-in-out hover:bg-pink-500 hover:text-white"
-                  >
-                    Generate
-                    <br />a Dream!
-                  </button>
-                  <button
-                    disabled={isLoading}
-                    onClick={handleSave}
-                    type="button"
-                    className="ml-4 bg-green-400 px-4 py-2 rounded-2xl text-md shadow-xl border-2 border-black transition duration-300 ease-in-out hover:bg-green-500 hover:text-white disabled:opacity-50"
-                  >
-                    Analyze
-                  </button>
-                </div>
+        <div
+          className="absolute w-full transition-all duration-300"
+          style={{
+            transform: 'translateX(10px) translateY(10px) scale(0.975)',
+            zIndex: 2,
+            opacity: 0.5,
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 h-[700px]" />
+        </div>
 
+        {/* Main Card */}
+        <div className="relative z-10 bg-white rounded-xl shadow-2xl p-6 border border-gray-200 h-[700px] overflow-y-auto">
+          {/* Header */}
+          <div className="flex sm:flex-row flex-col justify-between items-start mb-6 pb-4 border-b border-gray-200">
+            <div>
+              <p className="text-sm text-gray-500">
+                {new Date(entry?.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+              {subject && <h2 className="text-2xl font-semibold text-gray-900 mt-2">{subject}</h2>}
+            </div>
+            <div className="flex flex-col">
+              <div className="flex gap-2 sm:mt-0 mt-2">
                 <button
-                  type="button"
-                  onClick={goNext}
-                  disabled={!nextEntry || loading}
-                  className="absolute right-0 p-2 rounded-full border bg-pink-300 border-black/50 hover:bg-pink-500 hover:text-white disabled:opacity-40"
-                  aria-label="Next entry"
-                  title="Next entry"
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-pink-400 text-gray-900 rounded-lg hover:bg-pink-500 hover:text-white transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <IconArrowRight />
+                  <IconSparkles size={18} />
+                  Generate Dream
                 </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-green-400 text-gray-900 rounded-lg hover:bg-green-500 hover:text-white transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Analyze
+                </button>
+              </div>{' '}
+              <div className="flex border-none sm:justify-end justify-start items-start mt-2 border-b border-gray-200">
+                <span className="text-xs text-gray-500 mr-2 mt-[2px]">Doctor:</span>
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  {entry?.doctor_personality || 'Academic'}
+                </span>
               </div>
-            </form>
+            </div>
           </div>
+
+          {/* Loading Overlay */}
           {isLoading && (
-            <div className="spinner-overlay">
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-20 rounded-xl">
               <Image src="/spinner.gif" alt="Loading..." height="100" width="100" />
             </div>
           )}
-          <div className="flex flew-grow h-96">
-            <textarea
-              className="w-full h-full min-h-full px-4 py-4 text-xl resize-none border-solid border-2 border-black/60 rounded-lg shadow-md"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-          </div>
-        </div>
 
-        <div className="mt-5 flex justify-center items-center">
-          <div className="flex">
-            <div className="flex">
-              {analysisData.length > 0 ? (
-                <ul className="flex flex-wrap items-center justify-center px-4 py-4 gap-4">
-                  <li>
-                    <div
-                      className="py-12 shadow-lg border-solid border-2 border-black/60 rounded-full"
-                      style={{ backgroundColor: color || 'white' }}
-                    >
-                      <h2 className="px-3 text-sm text-center">Color Analysis</h2>
+          {/* Content Area */}
+          <div className="space-y-6">
+            {/* Text Editor */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Dream Entry</h3>
+              <textarea
+                className="w-full h-[350px] px-4 py-3 bg-slate-50 text-base resize-none border-2 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="Write or generate your dream here..."
+              />
+            </div>
+
+            {/* Analysis Results */}
+            {analysis && Object.keys(analysis).length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Dream Analysis</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Color Analysis */}
+                  {color && (
+                    <div className="col-span-2 flex items-center gap-4 p-4 rounded-lg border-2 bg-slate-100 border-gray-200">
+                      <div
+                        className="w-16 h-16 flex-shrink-0 rounded-full shadow-md border-2 border-gray-300"
+                        style={{ backgroundColor: color }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-700">Color Analysis</p>
+                        <p className="text-xs text-gray-500">Emotional tone represented by color</p>
+                      </div>
                     </div>
-                  </li>
-                  {analysisData.map((item) => (
-                    <li
-                      key={item.name}
-                      className="flex flex-col items-center justify-between shadow-lg bg-slate-100 px-4 py-2 rounded-lg border-solid border-2 border-black/60"
-                    >
-                      <span className="flex text-lg font-semibold px-2 py-2">{item.name}</span>
-                      <span className="py-2 font-serif max-h-72 overflow-scroll">
-                        {item.value || 'No analysis yet!'}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-center text-gray-500">
-                  No analysis yet! Click **Analyze** above.
-                </p>
-              )}
+                  )}
+
+                  {/* Mood */}
+                  {analysisMood && (
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs font-semibold text-blue-900 mb-1">Mood</p>
+                      <p className="text-sm text-blue-800">{analysisMood}</p>
+                    </div>
+                  )}
+
+                  {/* Dream Type */}
+                  {negative !== undefined && (
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-xs font-semibold text-purple-900 mb-1">Dream Type</p>
+                      <p className="text-sm text-purple-800">{negative ? 'Bad 😔' : 'Good 🙂'}</p>
+                    </div>
+                  )}
+
+                  {/* Summary */}
+                  {summary && (
+                    <div className="col-span-2 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Summary</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+                    </div>
+                  )}
+
+                  {/* Symbols */}
+                  {symbols && normalizeSymbolText(symbols) && (
+                    <div className="col-span-2 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                      <p className="text-xs font-semibold text-amber-900 mb-2">Symbols</p>
+                      <p className="text-sm text-amber-800">{normalizeSymbolText(symbols)}</p>
+                    </div>
+                  )}
+
+                  {/* Interpretation */}
+                  {interpretation && (
+                    <div className="col-span-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                      <p className="text-xs font-semibold text-slate-900 mb-2">Interpretation</p>
+                      <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
+                        {interpretation}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Delete Button */}
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={() => setDeleteModal(true)}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <IconTrash size={18} />
+                Delete Entry
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <div className="flex justify-center mt-10">
+
+      {/* Navigation Controls */}
+      <div className="flex items-center gap-6">
         <button
-          onClick={handleDelete}
-          disabled={isLoading}
-          type="submit"
-          className="bg-red-500 px-4 py-2 rounded-2xl text-lg ml-5 shadow-xl border-solid border-2 border-black transition duration-300 ease-in-out hover:bg-red-900 hover:text-white"
+          onClick={goPrev}
+          disabled={!prevEntry || loading}
+          className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          aria-label="Previous entry"
         >
-          DELETE!
+          <IconChevronLeft size={24} />
         </button>
+
+        <div className="text-gray-600 font-medium min-w-[100px] text-center">
+          {currentIndex >= 0 ? `${currentIndex + 1} / ${entries?.length || 0}` : '- / -'}
+        </div>
+
+        <button
+          onClick={goNext}
+          disabled={!nextEntry || loading}
+          className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          aria-label="Next entry"
+        >
+          <IconChevronRight size={24} />
+        </button>
+
+        {deleteModal &&
+          ReactDOM.createPortal(
+            <BasicModal handleConfirm={handleDelete} setDeleteModal={setDeleteModal} />,
+            document.body
+          )}
       </div>
     </div>
   );
