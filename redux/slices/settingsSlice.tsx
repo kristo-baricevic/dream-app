@@ -1,4 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_URL = 'http://localhost:8000';
 
 export type Astrology = {
   sun: string;
@@ -12,6 +15,7 @@ export type MedicalHistory = {
 };
 
 export type Settings = {
+  id?: string;
   astrology: Astrology;
   occupation: string;
   medicalHistory: MedicalHistory;
@@ -30,18 +34,18 @@ type SettingsState = Settings;
 
 const initialState: SettingsState = {
   astrology: {
-    sun: 'Leo',
-    moon: 'Pisces',
-    rising: 'Virgo',
+    sun: '',
+    moon: '',
+    rising: '',
   },
-  occupation: 'Developer',
+  occupation: '',
   medicalHistory: {
-    psychological: ['anxiety'],
-    physical: ['asthma'],
+    psychological: [''],
+    physical: [''],
   },
-  personality: 'INTJ',
-  doctorPersonality: 'Academic',
-  doctorImage: '/owl_images/owl1.png',
+  personality: '',
+  doctorPersonality: '',
+  doctorImage: '',
   influence: {
     astrology: 0.15,
     personality: 0.15,
@@ -57,6 +61,42 @@ const doctorImages: Record<string, string> = {
   Compassionate: '/owl_images/owl4.png',
   Scientific: '/owl_images/owl5.png',
 };
+
+export const fetchSettings = createAsyncThunk<Settings>(
+  'settings/fetchSettings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_URL}/api/settings/`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch settings');
+      const data = await res.json();
+      return data[0];
+    } catch (err: any) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const updateSettings = createAsyncThunk<Settings, Partial<Settings>>(
+  'settings/updateSettings',
+  async (updatedSettings, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_URL}/api/settings/update/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updatedSettings),
+      });
+      if (!res.ok) throw new Error('Failed to update settings');
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
 const settingsSlice = createSlice({
   name: 'settings',
@@ -88,6 +128,7 @@ const settingsSlice = createSlice({
     setDoctorPersonality: (state, action: PayloadAction<string>) => {
       state.doctorPersonality = action.payload;
       state.doctorImage = doctorImages[action.payload] || '';
+      console.log('state.doctorImage ', state.doctorImage);
     },
     addPsychological: (state, action: PayloadAction<string>) => {
       state.medicalHistory.psychological.push(action.payload);
@@ -117,6 +158,15 @@ const settingsSlice = createSlice({
       state.influence[action.payload.field] = action.payload.value;
     },
     resetSettings: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchSettings.fulfilled, (state, action) => {
+        Object.assign(state, action.payload);
+      })
+      .addCase(updateSettings.fulfilled, (state, action) => {
+        Object.assign(state, action.payload);
+      });
   },
 });
 

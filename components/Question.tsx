@@ -1,11 +1,11 @@
 'use client';
 
-import { SetStateAction, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { JournalEntry } from '@/types';
 import { RootState } from '@/redux/rootReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { setDoctorPersonality } from '@/redux/slices/settingsSlice';
+import { fetchSettings, setDoctorPersonality } from '@/redux/slices/settingsSlice';
 import { AppDispatch } from '@/redux/store';
 import { WorkflowViewer } from './WorkflowViewer';
 import { useWorkflowPolling } from '@/utils/hooks/useWorkflowPolling';
@@ -34,6 +34,10 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
 
   const settings = useSelector((state: RootState) => state.settings);
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(fetchSettings());
+  }, [dispatch]);
 
   useWorkflowPolling(workflowId, (result) => {
     setResponse(result);

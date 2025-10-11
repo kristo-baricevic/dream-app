@@ -3,6 +3,7 @@
 import { RootState } from '@/redux/rootReducer';
 import { fetchAllAnalyses } from '@/redux/slices/analysisSlice';
 import { fetchAllCustomQuestions } from '@/redux/slices/customQuestionSlice';
+import { fetchSettings } from '@/redux/slices/settingsSlice';
 import { AppDispatch } from '@/redux/store';
 import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
@@ -23,6 +24,8 @@ const Analysis = () => {
     loading: questionLoading,
     error: questionError,
   } = useSelector((state: RootState) => state.customQuestion);
+
+  const settings = useSelector((state: RootState) => state.settings);
 
   const [viewMode, setViewMode] = useState<ViewMode>('analysis');
   const [currentIndex, setCurrentIndex] = useState(0);

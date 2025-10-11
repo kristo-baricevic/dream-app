@@ -11,14 +11,14 @@ import {
   setOccupation,
   setPersonality,
   setDoctorPersonality,
-  setSettings,
   setInfluence,
+  fetchSettings,
+  updateSettings,
 } from '@/redux/slices/settingsSlice';
 import { AppDispatch } from '@/redux/store';
 import { IconCheck, IconEdit, IconX } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Image from 'next/image';
 import DoctorSelection from '@/components/DoctorSelection';
 
 type EditableFieldProps = {
@@ -30,6 +30,7 @@ type EditableFieldProps = {
 const EditableField = ({ label, value, onSave }: EditableFieldProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
+
   const handleSave = () => {
     onSave(tempValue);
     setIsEditing(false);
@@ -87,11 +88,105 @@ const EditableField = ({ label, value, onSave }: EditableFieldProps) => {
 export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();
   const settings = useSelector((state: RootState) => state.settings);
-  const [selectedPersonality, setSelectedPersonality] = useState('Academic');
 
-  const handlePersonalitySelect = (personality: string) => {
-    setSelectedPersonality(personality);
-    dispatch(setDoctorPersonality(personality));
+  useEffect(() => {
+    dispatch(fetchSettings());
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log('settings fetched ===', settings);
+  }, [settings]);
+
+  // Helper to sync current state to backend
+  const syncToBackend = () => {
+    dispatch(updateSettings(settings));
+  };
+
+  const handleAstrologyFieldSave = (field: keyof typeof settings.astrology, value: string) => {
+    dispatch(setAstrologyField({ field, value }));
+    // Send updated values immediately
+    dispatch(
+      updateSettings({
+        ...settings,
+        astrology: { ...settings.astrology, [field]: value },
+      })
+    );
+  };
+
+  const handleOccupationSave = (value: string) => {
+    dispatch(setOccupation(value));
+    dispatch(updateSettings({ ...settings, occupation: value }));
+  };
+
+  const handlePersonalitySave = (value: string) => {
+    dispatch(setPersonality(value));
+    dispatch(updateSettings({ ...settings, personality: value }));
+  };
+
+  const handleInfluenceChange = (field: keyof typeof settings.influence, value: number) => {
+    dispatch(setInfluence({ field, value }));
+  };
+
+  const handleInfluenceChangeEnd = () => {
+    syncToBackend();
+  };
+
+  const handleAddPsychological = () => {
+    const item = prompt('Add psychological condition:');
+    if (item) {
+      dispatch(addPsychological(item));
+      dispatch(
+        updateSettings({
+          ...settings,
+          medicalHistory: {
+            ...settings.medicalHistory,
+            psychological: [...settings.medicalHistory.psychological, item],
+          },
+        })
+      );
+    }
+  };
+
+  const handleRemovePsychological = (index: number) => {
+    dispatch(removePsychological(index));
+    dispatch(
+      updateSettings({
+        ...settings,
+        medicalHistory: {
+          ...settings.medicalHistory,
+          psychological: settings.medicalHistory.psychological.filter((_, i) => i !== index),
+        },
+      })
+    );
+  };
+
+  const handleAddPhysical = () => {
+    const item = prompt('Add physical condition:');
+    if (item) {
+      dispatch(addPhysical(item));
+      dispatch(
+        updateSettings({
+          ...settings,
+          medicalHistory: {
+            ...settings.medicalHistory,
+            physical: [...settings.medicalHistory.physical, item],
+          },
+        })
+      );
+    }
+  };
+
+  const handleRemovePhysical = (index: number) => {
+    dispatch(removePhysical(index));
+    dispatch(
+      updateSettings({
+        ...settings,
+        medicalHistory: {
+          ...settings.medicalHistory,
+          physical: settings.medicalHistory.physical.filter((_, i) => i !== index),
+        },
+      })
+    );
   };
 
   return (
@@ -101,15 +196,12 @@ export default function Settings() {
         These settings act as weights for the context the LLM uses to analyze your dreams.
       </p>
 
-      {/* Personal Info Section */}
+      {/* Doctor Selection */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Choose your doctor:</h2>
         <div className="grid gap-3">
           <div className="flex justify-center mb-4">
-            <DoctorSelection
-              selectedPersonality={selectedPersonality}
-              onSelect={handlePersonalitySelect}
-            />
+            <DoctorSelection selectedPersonality={settings.doctorPersonality} />
           </div>
         </div>
       </div>
@@ -120,23 +212,24 @@ export default function Settings() {
         <InfluenceDial
           label="Influence"
           value={settings.influence.astrology}
-          onChange={(v) => dispatch(setInfluence({ field: 'astrology', value: v }))}
+          onChange={(v) => handleInfluenceChange('astrology', v)}
+          onChangeEnd={handleInfluenceChangeEnd}
         />
         <div className="grid gap-3">
           <EditableField
             label="Sun Sign"
             value={settings.astrology.sun}
-            onSave={(value) => dispatch(setAstrologyField({ field: 'sun', value }))}
+            onSave={(value) => handleAstrologyFieldSave('sun', value)}
           />
           <EditableField
             label="Moon Sign"
             value={settings.astrology.moon}
-            onSave={(value) => dispatch(setAstrologyField({ field: 'moon', value }))}
+            onSave={(value) => handleAstrologyFieldSave('moon', value)}
           />
           <EditableField
             label="Rising Sign"
             value={settings.astrology.rising}
-            onSave={(value) => dispatch(setAstrologyField({ field: 'rising', value }))}
+            onSave={(value) => handleAstrologyFieldSave('rising', value)}
           />
         </div>
       </div>
@@ -147,19 +240,20 @@ export default function Settings() {
         <InfluenceDial
           label="Influence"
           value={settings.influence.personality}
-          onChange={(v) => dispatch(setInfluence({ field: 'personality', value: v }))}
+          onChange={(v) => handleInfluenceChange('personality', v)}
+          onChangeEnd={handleInfluenceChangeEnd}
         />
 
         <div className="grid gap-3">
           <EditableField
             label="Occupation"
             value={settings.occupation}
-            onSave={(value) => dispatch(setOccupation(value))}
+            onSave={handleOccupationSave}
           />
           <EditableField
             label="Personality Type"
             value={settings.personality}
-            onSave={(value) => dispatch(setPersonality(value))}
+            onSave={handlePersonalitySave}
           />
         </div>
       </div>
@@ -170,7 +264,8 @@ export default function Settings() {
         <InfluenceDial
           label="Influence"
           value={settings.influence.medicalHistory}
-          onChange={(v) => dispatch(setInfluence({ field: 'medicalHistory', value: v }))}
+          onChange={(v) => handleInfluenceChange('medicalHistory', v)}
+          onChangeEnd={handleInfluenceChangeEnd}
         />
         <div className="mb-4">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Psychological</h3>
@@ -182,7 +277,7 @@ export default function Settings() {
               >
                 <span>{item}</span>
                 <button
-                  onClick={() => dispatch(removePsychological(index))}
+                  onClick={() => handleRemovePsychological(index)}
                   className="hover:text-purple-900"
                 >
                   <IconX size={16} />
@@ -190,10 +285,7 @@ export default function Settings() {
               </div>
             ))}
             <button
-              onClick={() => {
-                const item = prompt('Add psychological condition:');
-                if (item) dispatch(addPsychological(item));
-              }}
+              onClick={handleAddPsychological}
               className="px-3 py-1 bg-purple-500 text-white rounded-full hover:bg-purple-600 text-sm"
             >
               + Add
@@ -210,19 +302,13 @@ export default function Settings() {
                 className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full"
               >
                 <span>{item}</span>
-                <button
-                  onClick={() => dispatch(removePhysical(index))}
-                  className="hover:text-blue-900"
-                >
+                <button onClick={() => handleRemovePhysical(index)} className="hover:text-blue-900">
                   <IconX size={16} />
                 </button>
               </div>
             ))}
             <button
-              onClick={() => {
-                const item = prompt('Add physical condition:');
-                if (item) dispatch(addPhysical(item));
-              }}
+              onClick={handleAddPhysical}
               className="px-3 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 text-sm"
             >
               + Add
