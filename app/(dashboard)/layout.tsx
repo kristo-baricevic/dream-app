@@ -1,22 +1,28 @@
 // import { UserButton } from "@clerk/nextjs";
+'use client';
+import { RootState } from '@/redux/rootReducer';
 import { IconCloudFilled } from '@tabler/icons-react';
 import Link from 'next/link';
-
-const links = [
-  // { href: '/', label: 'Landing Page' },
-  { href: '/journal', label: 'Home' },
-  { href: '/analysis', label: 'Analysis' },
-  { href: '/history', label: 'Charts' },
-  // { href: '/playlist', label: 'Playlist' },
-  { href: '/settings', label: 'Settings' },
-  { href: '/about', label: 'About' },
-];
+import { useSelector } from 'react-redux';
 
 type DashboardLayoutProps<T = {}> = {
   children: React.ReactNode;
 } & T;
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const firstEntry = useSelector((state: RootState) => state.journal.entries[0]);
+
+  const links = [
+    // { href: '/', label: 'Landing Page' },
+    { href: '/journal', label: 'Home' },
+    { href: `/journal/${firstEntry?.id}`, label: 'Journal' },
+    { href: '/analysis', label: 'Analysis' },
+    { href: '/history', label: 'Charts' },
+    // { href: '/playlist', label: 'Playlist' },
+    { href: '/settings', label: 'Settings' },
+    { href: '/about', label: 'About' },
+  ];
+
   return (
     <div className="min-h-screen bg-pink-100 background-main font-sans">
       <header className="bg-white border-b border-black/10 sticky">
@@ -25,7 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <h1 className="flex justify-center items-center text-2xl gap-2">
               {' '}
               <IconCloudFilled className="flex justify-center items-center w-6 h-6 text-white" />
-              Dream With AI
+              <span className="font-mono ml-2 text-[20px]">Dream With AI</span>
             </h1>
           </div>
           {/* <UserButton /> */}
@@ -34,8 +40,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <nav className="bg-white border-b border-black/10">
         <ul className="flex sm:space-x-4 justify-center">
           {links.map((link) => (
-            <li className="hover:bg-pink-300 px-4 py-2 text-xs sm:text-base" key={link.href}>
-              <Link href={link.href}>{link.label}</Link>
+            <li
+              className="hover:bg-pink-300 sm:px-4 px-[8px] py-2 text-xs sm:text-base"
+              key={link.href}
+            >
+              <Link href={link.href}>
+                <span className="text-mono">{link.label}</span>
+              </Link>
             </li>
           ))}
         </ul>
