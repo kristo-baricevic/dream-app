@@ -222,7 +222,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
           {response && (
             <div className="flex px-2 py-6 font-serif max-w-3xl max-h-[500px] ">
               <div className="bg-slate-100 p-4 rounded-2xl border-2 border-blue-300 shadow-lg overflow-y-auto">
-                <p>{response}</p>
+                <p className="whitespace-pre-wrap">{response}</p>
               </div>
             </div>
           )}

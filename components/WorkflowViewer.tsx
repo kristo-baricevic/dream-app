@@ -162,7 +162,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
 
 const StepStatusIcon: React.FC<{ status: string }> = ({ status }) => {
   if (status === 'completed') return <span className="text-green-600">✓</span>;
-  if (status === 'running') return <span className="text-blue-600 animate-spin">⏳</span>;
+  if (status === 'running') return <span className="text-blue-600 animate-spin ml-2">⏳</span>;
   if (status === 'failed') return <span className="text-red-600">✗</span>;
   return <span className="text-gray-400">○</span>;
 };

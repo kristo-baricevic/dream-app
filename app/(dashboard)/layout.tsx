@@ -31,7 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <h1 className="flex justify-center items-center text-2xl gap-2">
               {' '}
               <IconCloudFilled className="flex justify-center items-center w-6 h-6 text-white" />
-              <span className="font-mono ml-2 text-[20px]">Dream With AI</span>
+              <span className="font-mono ml-2 text-[20px]">Dream Analyzer</span>
             </h1>
           </div>
           {/* <UserButton /> */}

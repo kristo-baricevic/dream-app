@@ -34,6 +34,8 @@ const Editor = ({ entry }: any) => {
     negative,
   } = analysis || {};
 
+  console.log('entry is ', entry);
+
   const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
@@ -112,10 +114,6 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
-      return;
-    }
-
     try {
       await deleteEntry(entry.id);
       router.push('/journal');
@@ -186,7 +184,7 @@ const Editor = ({ entry }: any) => {
               <div className="flex border-none sm:justify-end justify-start items-start mt-2 border-b border-gray-200">
                 <span className="text-xs text-gray-500 mr-2 mt-[2px]">Doctor:</span>
                 <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  {entry?.doctor_personality || 'Academic'}
+                  {entry?.analysis?.doctor_personality || 'Academic'}
                 </span>
               </div>
             </div>
