@@ -9,6 +9,7 @@ import Question from '@/components/Question';
 import DreamCatcher from '@/components/DreamCatcher';
 import { RootState } from '@/redux/rootReducer';
 import MainHeader from './MainHeader';
+import ChatInterface from './ChatInterface';
 
 const DreamMain: React.FC = () => {
   const router = useRouter();
@@ -49,6 +50,9 @@ const DreamMain: React.FC = () => {
       <>
         <div className="flex justify-center mb-4">
           <Question entries={entries} />
+        </div>
+        <div>
+          <ChatInterface />
         </div>
 
         <MainHeader
