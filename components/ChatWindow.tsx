@@ -39,7 +39,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
 
     // TODO: Replace with actual API call to your FastAPI backend
     try {
-      const URL = local ? `${FAST_API_URL}/chat/message` : `${API_URL}/fastapi/chat/message`;
+      const URL = local ? `${FAST_API_URL}/chat/message` : `${API_URL}/chat/message`;
 
       const response = await fetch(URL, {
         method: 'POST',
