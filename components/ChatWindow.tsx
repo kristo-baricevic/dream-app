@@ -13,6 +13,10 @@ interface ChatWindowProps {
   isOpen: boolean;
   setIsOpen: any;
 }
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
+const local = false;
 
 export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,7 +39,9 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
 
     // TODO: Replace with actual API call to your FastAPI backend
     try {
-      const response = await fetch('http://localhost:8002/api/chat/message', {
+      const URL = local ? `${FAST_API_URL}/chat/message` : `${API_URL}/fastapi/chat/message`;
+
+      const response = await fetch(URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
