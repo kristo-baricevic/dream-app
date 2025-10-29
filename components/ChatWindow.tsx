@@ -1,5 +1,6 @@
 'use client';
 
+import useIsMobile from '@/utils/isMobile';
 import { useState } from 'react';
 
 interface Message {
@@ -22,7 +23,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const isMobile = useIsMobile();
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -91,7 +92,9 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
     <>
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200">
+        <div
+          className={`fixed bottom-6 right-6 ${isMobile ? 'w-[275px]' : 'w-96'} h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200`}
+        >
           {/* Header */}
           <div className="bg-pink-500 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-2">
