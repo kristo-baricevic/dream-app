@@ -180,7 +180,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
                 onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
                 disabled={isLoading}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                className={`flex-1 border ${isMobile ? 'max-w-[150px]' : ''} border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100`}
               />
               <button
                 onClick={handleSend}
