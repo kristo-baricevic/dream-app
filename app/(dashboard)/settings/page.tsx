@@ -263,14 +263,14 @@ export default function Settings() {
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Medical History</h2>
         <InfluenceDial
           label="Influence"
-          value={settings.influence.medicalHistory}
+          value={settings?.influence?.medicalHistory}
           onChange={(v) => handleInfluenceChange('medicalHistory', v)}
           onChangeEnd={handleInfluenceChangeEnd}
         />
         <div className="mb-4">
           <h3 className="text-sm font-medium text-gray-600 mb-2">Psychological</h3>
           <div className="flex flex-wrap gap-2">
-            {settings.medicalHistory.psychological.map((item, index) => (
+            {settings?.medicalHistory?.psychological?.map((item, index) => (
               <div
                 key={index}
                 className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-800 rounded-full"
@@ -296,7 +296,7 @@ export default function Settings() {
         <div>
           <h3 className="text-sm font-medium text-gray-600 mb-2">Physical</h3>
           <div className="flex flex-wrap gap-2">
-            {settings.medicalHistory.physical.map((item, index) => (
+            {settings?.medicalHistory?.physical?.map((item, index) => (
               <div
                 key={index}
                 className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full"

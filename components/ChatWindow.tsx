@@ -2,6 +2,7 @@
 
 import useIsMobile from '@/utils/isMobile';
 import { useState } from 'react';
+import FeedbackWidget from './FeedbackWidget';
 
 interface Message {
   id: string;
@@ -197,6 +198,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
                 </svg>
               </button>
             </div>
+            <FeedbackWidget />
           </div>
         </div>
       )}

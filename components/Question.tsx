@@ -17,6 +17,8 @@ import {
 import TypewriterText from './TypewriterText';
 import { set } from 'date-fns';
 import useIsSmallScreen from '@/utils/isSmallScreen';
+import ReactDOM from 'react-dom';
+import FeedbackComponent from './FeedbackComponent';
 
 type QuestionProps = {
   entries: JournalEntry[];
@@ -30,6 +32,8 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [workflowId, setWorkflowId] = useState<string | null>(null);
   const [questionSubmitted, setQuestionSubmitted] = useState<boolean>(false);
+  const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
+
   const isSmallScreen = useIsSmallScreen();
 
   const settings = useSelector((state: RootState) => state.settings);
@@ -218,7 +222,6 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
               </div>
             </div>
           )}
-
           {response && (
             <div className="flex px-2 py-6 font-serif max-w-3xl max-h-[500px] ">
               <div className="bg-slate-100 p-4 rounded-2xl border-2 border-blue-300 shadow-lg overflow-y-auto">
@@ -226,14 +229,33 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
               </div>
             </div>
           )}
-          <button
-            disabled={loading}
-            onClick={() => setQuestionSubmitted(false)}
-            type="button"
-            className="bg-red-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-red-500 hover:text-white disabled:opacity-50"
-          >
-            Clear
-          </button>
+          <div className="flex flex-row">
+            <button
+              disabled={loading}
+              onClick={() => setFeedbackModal(true)}
+              type="button"
+              className="bg-blue-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-blue-500 hover:text-white disabled:opacity-50"
+            >
+              Feedback
+            </button>
+            {feedbackModal &&
+              ReactDOM.createPortal(
+                <FeedbackComponent
+                  analysisId={workflowId}
+                  feedbackModal={feedbackModal}
+                  setFeedbackModal={setFeedbackModal}
+                />,
+                document.body
+              )}
+            <button
+              disabled={loading}
+              onClick={() => setQuestionSubmitted(false)}
+              type="button"
+              className="bg-red-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-red-500 hover:text-white disabled:opacity-50"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       )}
     </div>
