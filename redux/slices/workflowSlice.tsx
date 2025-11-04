@@ -33,6 +33,7 @@ export interface WorkflowExecution {
   overall_confidence?: number;
   total_citations: number;
   steps: WorkflowStep[];
+  analysis_id: string;
 }
 
 interface WorkflowState {
@@ -51,7 +52,7 @@ const initialState: WorkflowState = {
   expandedSteps: [],
 };
 
-const local = false;
+const local = true;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;

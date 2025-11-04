@@ -11,13 +11,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 export const useWorkflowPolling = (
   workflowId: string | null,
-  onComplete?: (result: string) => void
+  onComplete?: (result: string, analysisId?: string) => void
 ) => {
   const dispatch = useDispatch<AppDispatch>();
   const isPolling = useSelector(selectIsPolling);
   const currentWorkflow = useSelector(selectCurrentWorkflow);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const onCompleteRef = useRef(onComplete);
+  const analysisId = currentWorkflow?.analysis_id ?? null;
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -57,8 +58,9 @@ export const useWorkflowPolling = (
       currentWorkflow.final_result &&
       onCompleteRef.current
     ) {
-      console.log('✅ Workflow completed, calling onComplete');
-      onCompleteRef.current(currentWorkflow.final_result);
+      onCompleteRef.current(currentWorkflow.final_result, analysisId ?? undefined);
     }
-  }, [currentWorkflow?.status, currentWorkflow?.final_result]);
+  }, [currentWorkflow?.status, currentWorkflow?.final_result, analysisId]);
+
+  return analysisId;
 };

@@ -1,12 +1,7 @@
 import { IconSend, IconThumbDown, IconThumbUp } from '@tabler/icons-react';
 import React, { useState } from 'react';
 
-const FeedbackWidget = ({
-  analysisId,
-  analysisType = 'dream',
-  feedbackModal,
-  setFeedbackModal,
-}: any) => {
+const FeedbackWidget = ({ analysisId, analysisType, feedbackModal, setFeedbackModal }: any) => {
   const [rating, setRating] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [comment, setComment] = useState('');
@@ -19,16 +14,19 @@ const FeedbackWidget = ({
     relevance: null,
     helpful: null,
   });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [submitted, setSubmitted] = useState(false);
 
   const submitFeedback = async () => {
     try {
-      const response = await fetch('https://localhost:8000/api/feedback/submit/', {
+      const response = await fetch(`${API_URL}/api/feedback/submit/`, {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           analysis_id: analysisId,
+          analysis_type: analysisType,
           rating,
           comment,
           details,
@@ -64,7 +62,7 @@ const FeedbackWidget = ({
               setShowDetails(true);
             }}
             className={`p-2 rounded ${
-              rating === 'good' ? 'bg-green-500 text-white' : 'bg-white hover:bg-green-100'
+              rating === 'good' ? 'bg-green-500 text-white' : ' hover:bg-green-100'
             }`}
           >
             <IconThumbUp size={20} />
@@ -75,18 +73,18 @@ const FeedbackWidget = ({
               setShowDetails(true);
             }}
             className={`p-2 rounded ${
-              rating === 'bad' ? 'bg-red-500 text-white' : 'bg-white hover:bg-red-100'
+              rating === 'bad' ? 'bg-red-500 text-white' : ' hover:bg-red-100'
             }`}
           >
             <IconThumbDown size={20} />
           </button>
         </div>
-        {feedbackModal && (
+        {feedbackModal && !rating && (
           <button
             onClick={() => {
               setFeedbackModal(false);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -146,11 +144,11 @@ const FeedbackWidget = ({
             className="w-full p-2 border rounded text-sm"
             rows={3}
           />
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 justify-end">
             <button
               onClick={submitFeedback}
               disabled={!rating}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-black rounded-lg hover:bg-blue-500 disabled:opacity-50"
             >
               <IconSend size={16} />
               Submit Feedback
@@ -160,7 +158,7 @@ const FeedbackWidget = ({
                 setFeedbackModal(false);
               }}
               disabled={!rating}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-red-400 text-black rounded-lg hover:bg-red-500 disabled:opacity-50"
             >
               Cancel
             </button>

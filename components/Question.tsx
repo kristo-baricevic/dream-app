@@ -33,6 +33,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
   const [workflowId, setWorkflowId] = useState<string | null>(null);
   const [questionSubmitted, setQuestionSubmitted] = useState<boolean>(false);
   const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
+  const [returnedAnalysisId, setReturnedAnalysisId] = useState<string | null>(null);
 
   const isSmallScreen = useIsSmallScreen();
 
@@ -43,8 +44,9 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
     dispatch(fetchSettings());
   }, [dispatch]);
 
-  useWorkflowPolling(workflowId, (result) => {
+  useWorkflowPolling(workflowId, (result, analysisId) => {
     setResponse(result);
+    if (analysisId) setReturnedAnalysisId(analysisId);
     setLoading(false);
   });
 
@@ -97,7 +99,7 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
           settings,
         })
       ).unwrap();
-
+      setReturnedAnalysisId(result.analysis_id);
       setWorkflowId(result.workflow_id);
       setValue('');
     } catch (error) {
@@ -241,7 +243,8 @@ const Question: React.FC<QuestionProps> = ({ entries }) => {
             {feedbackModal &&
               ReactDOM.createPortal(
                 <FeedbackComponent
-                  analysisId={workflowId}
+                  analysisId={returnedAnalysisId}
+                  analysisType={isQuestion ? 'custom_question' : 'cumulative'}
                   feedbackModal={feedbackModal}
                   setFeedbackModal={setFeedbackModal}
                 />,
