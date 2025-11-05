@@ -128,7 +128,6 @@ const settingsSlice = createSlice({
     setDoctorPersonality: (state, action: PayloadAction<string>) => {
       state.doctorPersonality = action.payload;
       state.doctorImage = doctorImages[action.payload] || '';
-      console.log('state.doctorImage ', state.doctorImage);
     },
     addPsychological: (state, action: PayloadAction<string>) => {
       state.medicalHistory.psychological.push(action.payload);

@@ -34,8 +34,6 @@ const Editor = ({ entry }: any) => {
     negative,
   } = analysis || {};
 
-  console.log('entry is ', entry);
-
   const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
   const [deleteModal, setDeleteModal] = useState<boolean>(false);

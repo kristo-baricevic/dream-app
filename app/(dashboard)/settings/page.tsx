@@ -93,10 +93,6 @@ export default function Settings() {
     dispatch(fetchSettings());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log('settings fetched ===', settings);
-  }, [settings]);
-
   // Helper to sync current state to backend
   const syncToBackend = () => {
     dispatch(updateSettings(settings));

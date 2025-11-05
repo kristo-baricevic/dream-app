@@ -41,7 +41,7 @@ export const useWorkflowPolling = (
     intervalRef.current = setInterval(() => {
       console.log('📡 Polling...');
       dispatch(fetchWorkflowExecution(workflowId));
-    }, 100); // <-- Changed from 500 to 100
+    }, 250); // <-- Polling interval
 
     return () => {
       if (intervalRef.current) {

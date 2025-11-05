@@ -74,7 +74,7 @@ export const analyzeDreamsWithWorkflow = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data; // { answer: string, workflow_id: string }
+    return data;
   }
 );
 
@@ -96,7 +96,7 @@ export const askCustomQuestionWithWorkflow = createAsyncThunk(
     }
 
     const data = await response.json();
-    return data; // { answer: string, workflow_id: string }
+    return data;
   }
 );
 
