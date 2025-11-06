@@ -15,6 +15,7 @@ import { IconChevronLeft, IconChevronRight, IconSparkles, IconTrash } from '@tab
 import { RootState } from '@/redux/rootReducer';
 import BasicModal from './BasicModal';
 import ReactDOM from 'react-dom';
+import FeedbackComponent from './FeedbackComponent';
 
 const Editor = ({ entry }: any) => {
   const router = useRouter();
@@ -23,6 +24,8 @@ const Editor = ({ entry }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(entry?.analysis || {});
   const [mood, setMood] = useState<EmotionType>('Joy');
+  const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
+
   const settings = useSelector((state: RootState) => state.settings);
   const {
     mood: analysisMood,
@@ -275,10 +278,32 @@ const Editor = ({ entry }: any) => {
 
             {/* Delete Button */}
             <div className="flex justify-center pt-4">
+              {analysis && (
+                <>
+                  <button
+                    disabled={loading}
+                    onClick={() => setFeedbackModal(true)}
+                    type="button"
+                    className="bg-blue-400 px-4 py-2 mr-4 rounded-2xl text-lg shadow-xl border-2 border-black transition duration-300 hover:bg-blue-500 hover:text-white disabled:opacity-50"
+                  >
+                    Feedback
+                  </button>
+                  {feedbackModal &&
+                    ReactDOM.createPortal(
+                      <FeedbackComponent
+                        analysisId={entry.analysis.id}
+                        analysisType={'analysis'}
+                        feedbackModal={feedbackModal}
+                        setFeedbackModal={setFeedbackModal}
+                      />,
+                      document.body
+                    )}
+                </>
+              )}
               <button
                 onClick={() => setDeleteModal(true)}
                 disabled={isLoading}
-                className="flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2 text-lg bg-red-400 text-black hover:text-white border-2 border-black rounded-2xl hover:bg-red-500 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <IconTrash size={18} />
                 Delete Entry

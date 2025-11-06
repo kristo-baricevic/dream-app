@@ -33,6 +33,10 @@ export type AnalysisData = {
   symbols: string[];
 };
 
+export type Symbols = {
+  symbols: string[];
+}
+
 export type CumulativeAnalysisData = {
   id: string;
   created_at: Date;

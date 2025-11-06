@@ -6,6 +6,7 @@ import playlistReducer from './slices/playlistSlice';
 import settingsReducer from './slices/settingsSlice';
 import customQuestionReducer from './slices/customQuestionSlice';
 import workflowReducer from './slices/workflowSlice';
+import chartsReducer from './slices/chartsSlice';
 
 const rootReducer = combineReducers({
   journal: journalReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   settings: settingsReducer,
   customQuestion: customQuestionReducer,
   workflow: workflowReducer,
+  charts: chartsReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
