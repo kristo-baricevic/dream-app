@@ -33,11 +33,12 @@ type MainHeaderProps = {
 type DreamSearch = {
   entries: string;
   title: string;
-  moods: string;
   analysis: string;
+  symbols: string;
+  moods: string;
 };
 
-const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'analysis', 'moods'];
+const searchFields: (keyof DreamSearch)[] = ['entries', 'title', 'analysis', 'symbols', 'moods'];
 
 const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: MainHeaderProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -64,7 +65,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
     <div className="flex flex-col gap-6 w-full">
       {/* Top row */}
       <div className="flex w-full items-center justify-between gap-2">
-        {/* Left → Search toggle */}
+        {/* Search toggle */}
         {!toggleSearch ? (
           <div
             onClick={() => {
@@ -87,7 +88,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
           </div>
         )}
 
-        {/* Center → New Entry */}
+        {/* New Entry */}
         <div onClick={handleOnClick} className="cursor-pointer">
           {isLoadingNewEntry ? (
             <div className="spinner-overlay">
@@ -100,7 +101,7 @@ const MainHeader = ({ layout, setLayout, handleOnClick, isLoadingNewEntry }: Mai
           )}
         </div>
 
-        {/* Right → Layout icons */}
+        {/* Layout icons */}
         <div className="flex flex-row gap-2">
           <div
             className={`shadow-md flex items-center justify-center h-12 w-12 rounded-full cursor-pointer ${

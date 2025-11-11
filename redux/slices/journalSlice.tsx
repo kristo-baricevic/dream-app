@@ -42,6 +42,7 @@ type SearchParams = Partial<{
   title: string;
   moods: string;
   analysis: string;
+  symbols: string;
   start_date: string;
   end_date: string;
   page: number;
