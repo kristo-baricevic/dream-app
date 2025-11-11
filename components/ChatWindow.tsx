@@ -3,6 +3,9 @@
 import useIsMobile from '@/utils/isMobile';
 import { useState, useRef, useEffect } from 'react';
 import FeedbackWidget from './FeedbackWidget';
+import { fetchEntries } from '@/redux/slices/journalSlice';
+import { AppDispatch } from '@/redux/store';
+import { useDispatch } from 'react-redux';
 
 interface Message {
   id: string;
@@ -15,6 +18,12 @@ interface ChatWindowProps {
   isOpen: boolean;
   setIsOpen: any;
 }
+
+// types you already return from the API
+type UIEvent =
+  | { type: 'dream_staged'; payload: { dream_id: string; staged: boolean } }
+  | { type: 'refresh'; payload: { scope: string; reason?: string } };
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const CHAT_API_URL = process.env.NEXT_PUBLIC_CHAT_API_URL;
@@ -25,6 +34,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const isMobile = useIsMobile();
+  const dispatch = useDispatch<AppDispatch>();
 
   const listRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -33,12 +43,33 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
     endRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
+  const handleUiEvents = (events: UIEvent[] | undefined) => {
+    if (!events?.length) return;
+
+    for (const evt of events) {
+      switch (evt.type) {
+        case 'refresh':
+          if (evt.payload.scope === 'dreams_list') {
+            dispatch(fetchEntries({}));
+          }
+          break;
+
+        case 'dream_staged':
+          // optional optimistic update. safe to ignore if you do not need it.
+          // e.g. dispatch(dreamsSlice.actions.markStaged(evt.payload.dream_id));
+          break;
+      }
+    }
+  };
+
+  // first few: jump; later: smooth
   useEffect(() => {
-    scrollToBottom(messages.length <= 3); // first few: jump; later: smooth
+    scrollToBottom(messages.length <= 3);
   }, [messages]);
 
+  // keep nudging while bot "types"
   useEffect(() => {
-    if (isLoading) scrollToBottom(); // keep nudging while bot "types"
+    if (isLoading) scrollToBottom();
   }, [isLoading]);
 
   const handleSend = async (override?: string) => {
@@ -75,6 +106,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+      handleUiEvents(data.ui_events);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
