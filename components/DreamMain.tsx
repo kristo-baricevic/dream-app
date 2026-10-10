@@ -19,13 +19,11 @@ const DreamMain: React.FC = () => {
   const [isLoadingNewEntry, setIsLoadingNewEntry] = useState(false);
   const [layout, setLayout] = useState<string>('horizontal');
 
-  const userId = 33333;
+
 
   useEffect(() => {
-    if (userId) {
-      dispatch(fetchEntries({ page: 1, pageSize: 10 }));
-    }
-  }, [userId, dispatch]);
+    dispatch(fetchEntries({ page: 1, pageSize: 10 }));
+  }, [dispatch]);
 
   const handleOnClick = async () => {
     setIsLoadingNewEntry(true);
@@ -37,9 +35,9 @@ const DreamMain: React.FC = () => {
     }
   };
 
-  const handleDeleteEntry = async (id: string) => {
+  const handleDeleteEntry = async (id: string, ticket: import('@/lib/sourceResetGuard').SourceResetTicket) => {
     try {
-      dispatch(deleteEntryThunk(id));
+      await dispatch(deleteEntryThunk({ id, ticket })).unwrap();
     } catch (error) {
       console.error('Failed to delete entry:', error);
     }

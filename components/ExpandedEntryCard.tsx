@@ -1,4 +1,5 @@
 'use client';
+import { captureSourceReset, SourceResetTicket } from '@/lib/sourceResetGuard';
 
 import { AnalysisData, JournalEntry } from '@/types';
 import { lightenColor } from '@/utils/colorUtilities';
@@ -11,12 +12,13 @@ import useIsSmallScreen from '@/utils/isSmallScreen';
 import useIsMobile from '@/utils/isMobile';
 import { formatAnalysis } from '@/utils/formatAnalysis';
 import BasicModal from './BasicModal';
+import SourceValidationNotice from './SourceValidationNotice';
 import ReactDOM from 'react-dom';
 
 type ExpandedEntryCardProps = {
   entry: JournalEntry;
   href: string;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, ticket: SourceResetTicket) => void;
   analysis: AnalysisData;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
@@ -31,8 +33,10 @@ const ExpandedEntryCard = ({
 }: ExpandedEntryCardProps) => {
   const router = useRouter();
 
-  const handleDelete = () => {
-    onDelete(entry.id);
+  const handleDelete = async () => {
+    const ticket = await captureSourceReset(entry.source_preimage, 'delete');
+    if (!ticket) return;
+    onDelete(entry.id, ticket);
     setDeleteModal(false);
   };
 
@@ -83,6 +87,7 @@ const ExpandedEntryCard = ({
       <div className={`${isExpanded ? 'mt-4' : ''} ml-10 flex flex-col`}>
         <div className="flex flex-col">
           <div className="px-4 font-serif">{date}</div>
+          <SourceValidationNotice status={dreamAnalysis?.source_validation} />
           <div className="px-4 content-truncate font-bold">{dreamAnalysis?.subject}</div>
           {isExpanded && showContent ? (
             <div className="mt-4 mr-4 px-4 max-h-[270px] overflow-y-auto space-y-2">

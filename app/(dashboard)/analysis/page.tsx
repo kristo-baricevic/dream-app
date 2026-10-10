@@ -8,6 +8,7 @@ import { AppDispatch } from '@/redux/store';
 import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import SourceValidationNotice from '@/components/SourceValidationNotice';
 
 type ViewMode = 'analysis' | 'questions';
 
@@ -197,6 +198,7 @@ const Analysis = () => {
               }}
             >
               <div className="bg-white rounded-xl shadow-2xl p-8 border border-gray-200 h-[600px] overflow-y-auto">
+                <SourceValidationNotice status={item.source_validation} />
                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-gray-200">
                   <div>
                     <p className="text-sm text-gray-500">
@@ -218,10 +220,10 @@ const Analysis = () => {
 
                     <div className="flex flex-wrap justify-end gap-1">
                       {[
-                        ['Theory', item.weights.theory],
-                        ['Astrology', item.weights.astrology],
-                        ['Personality', item.weights.personality],
-                        ['Medical', item.weights.medicalHistory],
+                        ['Theory', item.weights?.theory],
+                        ['Astrology', item.weights?.astrology],
+                        ['Personality', item.weights?.personality],
+                        ['Medical', item.weights?.medicalHistory],
                       ].map(([label, value]) => (
                         <span
                           key={label}

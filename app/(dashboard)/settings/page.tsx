@@ -189,12 +189,13 @@ export default function Settings() {
     <div className="max-w-5xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
       <p className="italic text-gray-500 mb-6">
-        These settings act as weights for the context the LLM uses to analyze your dreams.
+        These settings guide reflective interpretations. They do not measure accuracy or establish medical facts.
       </p>
 
       {/* Doctor Selection */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Choose your doctor:</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Choose your response persona:</h2>
+        <p className="text-sm text-gray-500 mb-3">Each persona is a fictional style, with no clinical authority.</p>
         <div className="grid gap-3">
           <div className="flex justify-center mb-4">
             <DoctorSelection selectedPersonality={settings.doctorPersonality} />
@@ -257,6 +258,7 @@ export default function Settings() {
       {/* Medical History Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Medical History</h2>
+        <p className="text-sm text-gray-500 mb-3">This influence dial currently has no effect on the numerical blend. Medical history is excluded from analysis until a specific consent flow is available.</p>
         <InfluenceDial
           label="Influence"
           value={settings?.influence?.medicalHistory}

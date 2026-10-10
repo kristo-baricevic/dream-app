@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/services/apiFetch';
 
 import { redirect } from 'next/navigation';
 import DreamMain from '@/components/DreamMain';
@@ -14,8 +15,8 @@ export default function JournalPage() {
   useEffect(() => {
     const fetchEntries = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/entries/`,
+        const res = await apiFetch(
+          `${''}/api/entries/`,
           { credentials: 'include' }
         );
         if (!res.ok) throw new Error('Failed to fetch entries');

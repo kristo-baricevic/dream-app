@@ -1,6 +1,7 @@
+import { apiFetch } from '@/services/apiFetch';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = '';
 // const API_URL = 'http://localhost:8000';
 
 export type Astrology = {
@@ -66,7 +67,7 @@ export const fetchSettings = createAsyncThunk<Settings>(
   'settings/fetchSettings',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_URL}/api/settings/`, {
+      const res = await apiFetch(`${API_URL}/api/settings/`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -83,7 +84,7 @@ export const updateSettings = createAsyncThunk<Settings, Partial<Settings>>(
   'settings/updateSettings',
   async (updatedSettings, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_URL}/api/settings/update/`, {
+      const res = await apiFetch(`${API_URL}/api/settings/update/`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

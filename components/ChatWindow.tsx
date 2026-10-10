@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/services/apiFetch';
 
 import useIsMobile from '@/utils/isMobile';
 import { useState, useRef, useEffect } from 'react';
@@ -24,9 +25,9 @@ type UIEvent =
   | { type: 'dream_staged'; payload: { dream_id: string; staged: boolean } }
   | { type: 'refresh'; payload: { scope: string; reason?: string } };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = '';
 
-const CHAT_API_URL = process.env.NEXT_PUBLIC_CHAT_API_URL;
+const CHAT_API_URL = '/chat';
 const local = false;
 
 export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
@@ -89,14 +90,15 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
 
     try {
       const URL = local ? `${CHAT_API_URL}/message` : `${API_URL}/chat/message`;
-      const response = await fetch(URL, {
+      const response = await apiFetch(URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: content,
-          conversation_history: messages.map((m) => ({ role: m.role, content: m.content })),
+          conversation_history: [],
         }),
       });
+      if (!response.ok) throw new Error('Chat unavailable');
       const data = await response.json();
 
       const assistantMessage: Message = {
@@ -157,7 +159,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
           <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.length === 0 && (
               <div className="text-center text-gray-600 mt-4 space-y-3">
-                <p className="text-sm">Start a conversation about your dreams!</p>
+                <p className="text-sm">Ask about your dreams. Each reply uses your current message and saved records.</p>
                 <div className="flex flex-col gap-2 flex-start">
                   <button
                     onClick={() => handleSend('Add a dream entry for me.')}

@@ -1,3 +1,5 @@
+import { apiFetch } from '@/services/apiFetch';
+import { sourceMutationFields } from '@/lib/sourceResetGuard';
 // src/redux/slices/journalSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { JournalEntry, Mood } from '@/types';
@@ -7,11 +9,11 @@ import { RootState } from '../rootReducer';
 
 const local = false;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
-const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;
+const API_URL = '';
+const FAST_API_URL = '/fastapi';
 
 const entriesUrlFrom = (nextUrl: string) => {
-  const u = new URL(nextUrl, API_URL);
+  const u = new URL(nextUrl, 'http://localhost');
   return `${API_URL}/api/entries/?${u.searchParams.toString()}`;
 };
 
@@ -62,7 +64,7 @@ export const fetchEntries = createAsyncThunk<PaginatedResponse, SearchParams>(
       ),
     });
 
-    const res = await fetch(`${API_URL}/api/entries/?${query.toString()}`, {
+    const res = await apiFetch(`${API_URL}/api/entries/?${query.toString()}`, {
       credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to fetch entries');
@@ -77,7 +79,7 @@ export const fetchNextEntries = createAsyncThunk<PaginatedResponse, void, { stat
     if (!nextUrl) return rejectWithValue('No next page') as never;
 
     const normalized = entriesUrlFrom(nextUrl); // ← build the correct URL
-    const res = await fetch(normalized, { credentials: 'include' });
+    const res = await apiFetch(normalized, { credentials: 'include' });
     if (!res.ok) {
       const errorText = await res.text();
       throw new Error(`Failed to fetch next page. Status: ${res.status}, Message: ${errorText}`);
@@ -87,19 +89,21 @@ export const fetchNextEntries = createAsyncThunk<PaginatedResponse, void, { stat
 );
 
 export const fetchMoods = createAsyncThunk('journal/fetchMoods', async () => {
-  const res = await fetch(`${API_URL}/api/entries/moods`, {
+  const res = await apiFetch(`${API_URL}/api/entries/moods`, {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to fetch entries');
   return res.json();
 });
 
-export const deleteEntryThunk = createAsyncThunk<string, string>(
+export const deleteEntryThunk = createAsyncThunk<string, { id: string; ticket: import('@/lib/sourceResetGuard').SourceResetTicket }>(
   'journal/deleteEntry',
-  async (id: string, { rejectWithValue }) => {
+  async ({ id, ticket }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_URL}/api/entries/${id}/delete/`, {
+      const res = await apiFetch(`${API_URL}/api/entries/${id}/delete/`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'X-Dream-Principal': ticket.expected_principal },
+        body: JSON.stringify(sourceMutationFields(ticket)),
         credentials: 'include',
       });
 
@@ -120,7 +124,7 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
   'journal/createEntry',
   async (content = 'New entry', { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_URL}/api/entries/create/`, {
+      const res = await apiFetch(`${API_URL}/api/entries/create/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -142,13 +146,13 @@ export const createEntryThunk = createAsyncThunk<JournalEntry, string | void>(
 
 export const updateEntryThunk = createAsyncThunk<
   JournalEntry,
-  { id: string; content: string; mood: EmotionType; settings: Record<string, any> }
->('journal/updateEntry', async ({ id, content, mood, settings }) => {
-  const res = await fetch(`${API_URL}/api/entries/${id}/update/`, {
+  { id: string; content: string; mood: EmotionType; settings: Record<string, any>; ticket: import('@/lib/sourceResetGuard').SourceResetTicket; source_origin?: 'unknown' | 'synthetic' }
+>('journal/updateEntry', async ({ id, content, mood, settings, ticket, source_origin = 'unknown' }) => {
+  const res = await apiFetch(`${API_URL}/api/entries/${id}/update/`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Dream-Principal': ticket.expected_principal },
     credentials: 'include',
-    body: JSON.stringify({ content, mood, settings }),
+    body: JSON.stringify({ content, mood, settings, ...sourceMutationFields(ticket), source_origin }),
   });
 
   if (!res.ok) {

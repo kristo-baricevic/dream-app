@@ -1,6 +1,8 @@
 'use client';
+import SourceValidationNotice from './SourceValidationNotice';
 
 import { generateDream } from '@/utils/api/clientApi';
+import { captureSourceReset, confirmSourceReset } from '@/lib/sourceResetGuard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -16,14 +18,17 @@ import { RootState } from '@/redux/rootReducer';
 import BasicModal from './BasicModal';
 import ReactDOM from 'react-dom';
 import FeedbackComponent from './FeedbackComponent';
+import { AnalysisData, JournalEntry } from '@/types';
 
-const Editor = ({ entry }: any) => {
+const Editor = ({ entry }: { entry: JournalEntry }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const [value, setValue] = useState(entry?.content);
+  const [value, setValue] = useState(entry.content);
+  const [sourceOrigin, setSourceOrigin] = useState<'unknown' | 'synthetic'>('unknown');
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(entry?.analysis || {});
-  const [mood, setMood] = useState<EmotionType>('Joy');
+  const [analysis, setAnalysis] = useState<Partial<AnalysisData>>(entry.analysis || {});
+  const [sourcePreimage, setSourcePreimage] = useState(entry.source_preimage);
+  const [mood] = useState<EmotionType>('Joy');
   const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
 
   const settings = useSelector((state: RootState) => state.settings);
@@ -37,7 +42,7 @@ const Editor = ({ entry }: any) => {
     negative,
   } = analysis || {};
 
-  const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
+  const normalizeSymbolText = (symbols: unknown) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
@@ -47,7 +52,7 @@ const Editor = ({ entry }: any) => {
     if (!entries || entries.length === 0) {
       dispatch(fetchEntries({ pageSize: 100 }));
     }
-  }, [dispatch, entries?.length]);
+  }, [dispatch, entries]);
 
   const { currentIndex, prevEntry, nextEntry } = useMemo(() => {
     const idx = entries?.findIndex((e) => e.id === entry?.id) ?? -1;
@@ -68,6 +73,8 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleSave = async () => {
+    const ticket = await captureSourceReset(sourcePreimage, 'update');
+    if (!ticket) return;
     try {
       setIsLoading(true);
       const data = await dispatch(
@@ -76,12 +83,13 @@ const Editor = ({ entry }: any) => {
           content: value,
           mood,
           settings,
+          ticket,
+          source_origin: sourceOrigin,
         })
       ).unwrap();
 
-      if (data && data.analysis) {
-        setAnalysis(data.analysis);
-      }
+      setSourcePreimage(data.source_preimage);
+      setAnalysis(data.analysis || {});
     } catch (error) {
       console.error('Failed to save entry:', error);
     } finally {
@@ -91,6 +99,7 @@ const Editor = ({ entry }: any) => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    if (!(await confirmSourceReset())) return;
     setIsLoading(true);
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     const randomNumber2 = Math.floor(Math.random() * 100) + 1;
@@ -106,6 +115,7 @@ const Editor = ({ entry }: any) => {
     try {
       const res = await generateDream(prompt);
       setValue(res);
+      setSourceOrigin('synthetic');
     } catch (error) {
       console.error('Failed to generate dream:', error);
       setValue('There has been an error!');
@@ -115,8 +125,10 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleDelete = async () => {
+    const ticket = await captureSourceReset(sourcePreimage, 'delete');
+    if (!ticket) return;
     try {
-      await deleteEntry(entry.id);
+      await deleteEntry(entry.id, ticket);
       router.push('/journal');
     } catch (error) {
       console.error('Failed to delete entry:', error);
@@ -206,7 +218,7 @@ const Editor = ({ entry }: any) => {
               <textarea
                 className="w-full h-[350px] px-4 py-3 bg-slate-50 text-base resize-none border-2 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => { setValue(e.target.value); setSourceOrigin('unknown'); }}
                 placeholder="Write or generate your dream here..."
               />
             </div>
@@ -215,6 +227,7 @@ const Editor = ({ entry }: any) => {
             {analysis && Object.keys(analysis).length > 0 && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900">Dream Analysis</h3>
+                <SourceValidationNotice status={analysis.source_validation} />
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Color Analysis */}
@@ -278,7 +291,7 @@ const Editor = ({ entry }: any) => {
 
             {/* Delete Button */}
             <div className="flex justify-center pt-4">
-              {analysis && (
+              {analysis.id && (
                 <>
                   <button
                     disabled={loading}
@@ -291,7 +304,7 @@ const Editor = ({ entry }: any) => {
                   {feedbackModal &&
                     ReactDOM.createPortal(
                       <FeedbackComponent
-                        analysisId={entry.analysis.id}
+                        analysisId={analysis.id}
                         analysisType={'analysis'}
                         feedbackModal={feedbackModal}
                         setFeedbackModal={setFeedbackModal}

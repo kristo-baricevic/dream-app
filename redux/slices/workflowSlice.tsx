@@ -1,11 +1,12 @@
+import { apiFetch } from '@/services/apiFetch';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = '';
 
 export interface Citation {
   source: string;
   content: string;
-  confidence: number;
+  confidence?: number | null;
   reference?: string;
 }
 
@@ -17,12 +18,14 @@ export interface WorkflowStep {
   status: 'pending' | 'running' | 'completed' | 'failed';
   duration_ms?: number;
   confidence?: number;
+  output_data?: unknown;
   reasoning?: string;
   model_used?: string;
   citations: Citation[];
 }
 
 export interface WorkflowExecution {
+  source_validation?: 'current' | 'historical_unvalidated';
   id: string;
   workflow_type: string;
   routine_name: string;
@@ -54,8 +57,8 @@ const initialState: WorkflowState = {
 
 const local = false;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
+const API_URL = '';
+const FAST_API_URL = '/fastapi';
 
 export const analyzeDreamsWithWorkflow = createAsyncThunk(
   'workflow/analyzeDreams',
@@ -63,7 +66,7 @@ export const analyzeDreamsWithWorkflow = createAsyncThunk(
     const URL = local ? `${FAST_API_URL}/qa-with-workflow` : `${API_URL}/fastapi/qa-with-workflow`;
     console.log('🔍 Starting workflow request...');
 
-    const response = await fetch(URL, {
+    const response = await apiFetch(URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -85,7 +88,7 @@ export const askCustomQuestionWithWorkflow = createAsyncThunk(
       ? `${FAST_API_URL}/custom-question-with-workflow`
       : `${API_URL}/fastapi/custom-question-with-workflow`;
 
-    const response = await fetch(URL, {
+    const response = await apiFetch(URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -103,7 +106,7 @@ export const askCustomQuestionWithWorkflow = createAsyncThunk(
 export const fetchWorkflowExecution = createAsyncThunk(
   'workflow/fetchExecution',
   async (workflowId: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/workflows/${workflowId}/`);
+    const response = await apiFetch(`${API_BASE_URL}/api/workflows/${workflowId}/`);
     if (!response.ok) throw new Error('Failed to fetch workflow');
     return response.json();
   }

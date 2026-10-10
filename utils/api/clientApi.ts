@@ -1,3 +1,5 @@
+import { apiFetch } from '@/services/apiFetch';
+import { captureSourceReset, SourceResetTicket, sourceMutationFields } from '@/lib/sourceResetGuard';
 import { JournalEntry } from '@/types';
 import { EmotionType } from '../parameters/emotions';
 import { getPersonality } from '../parameters/personalities';
@@ -9,8 +11,8 @@ export const createURL = (path: string) => {
 
 const local = false;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
+const API_URL = '';
+const FAST_API_URL = '/fastapi';
 
 export const updatedEntry = async (
   id: string,
@@ -18,16 +20,20 @@ export const updatedEntry = async (
   // personality: string,
   mood: EmotionType,
   settings: Settings,
+  preimage?: JournalEntry['source_preimage'],
 ) => {
+  const ticket = await captureSourceReset(preimage, 'update');
+  if (!ticket) throw new Error('Source update cancelled.');
   try {
-    const response = await fetch(
-      new Request(`${API_URL}/api/entries/${id}/update/`, {
+    const response = await apiFetch(
+      `${API_URL}/api/entries/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'X-Dream-Principal': ticket.expected_principal,
         },
-        body: JSON.stringify({ content, mood, settings }),
-      })
+        body: JSON.stringify({ content, mood, settings, ...sourceMutationFields(ticket), source_origin: 'unknown' }),
+      }
     );
 
     if (response.ok) {
@@ -45,14 +51,14 @@ export const updatedEntry = async (
 };
 
 export const createNewEntry = async (content: string = 'New entry') => {
-  const res = await fetch(
-    new Request(`${API_URL}/api/entries/create/`, {
+  const res = await apiFetch(
+    `${API_URL}/api/entries/create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ content }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -64,12 +70,14 @@ export const createNewEntry = async (content: string = 'New entry') => {
   }
 };
 
-export const deleteEntry = async (id: string) => {
+export const deleteEntry = async (id: string, ticket: SourceResetTicket) => {
   try {
-    const res = await fetch(
-      new Request(`${API_URL}/api/entries/${id}/delete/`, {
+    const res = await apiFetch(
+      `${API_URL}/api/entries/${id}/delete/`, {
         method: 'DELETE',
-      })
+        headers: { 'Content-Type': 'application/json', 'X-Dream-Principal': ticket.expected_principal },
+        body: JSON.stringify(sourceMutationFields(ticket)),
+      }
     );
 
     if (res.ok) {
@@ -93,8 +101,8 @@ export const askQuestion = async (
   const personalityPrompt = getPersonality(settings.doctorPersonality);
   const URL = local ? `${FAST_API_URL}/qa` : `${API_URL}/fastapi/qa`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +116,7 @@ export const askQuestion = async (
         personality: personalityPrompt,
         settings: settings,
       }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -120,14 +128,14 @@ export const askQuestion = async (
 export const generateDream = async (question: string) => {
   const URL = local ? `${FAST_API_URL}/generate-dream` : `${API_URL}/fastapi/generate-dream`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ theme: question }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -144,8 +152,8 @@ export const askCustomQuestion = async (
   const personalityPrompt = getPersonality(settings.doctorPersonality);
   const URL = local ? `${FAST_API_URL}/custom-question` : `${API_URL}/fastapi/custom-question`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +164,7 @@ export const askCustomQuestion = async (
         personality: personalityPrompt,
         settings: settings
       }),
-    })
+    }
   );
 
   if (res.ok) {

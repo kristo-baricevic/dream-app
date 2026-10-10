@@ -15,7 +15,7 @@ import LoadSentinel from './LoadSentinel';
 
 type DreamCatcherProps = {
   entries: JournalEntry[];
-  onDeleteEntry: (id: string) => void;
+  onDeleteEntry: (id: string, ticket: import('@/lib/sourceResetGuard').SourceResetTicket) => void;
   layout: string;
 };
 

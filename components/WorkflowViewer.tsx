@@ -8,8 +8,10 @@ import {
   selectExpandedSteps,
   toggleStepExpanded,
 } from '@/redux/slices/workflowSlice';
-import { AppDispatch } from 'recharts/types/state/store';
+import type { AppDispatch } from '@/redux/store';
 import { useDispatch, useSelector } from 'react-redux';
+import { claimRows, coverageLabel, evidenceSources } from '@/utils/workflowEvidence';
+import SourceValidationNotice from './SourceValidationNotice';
 
 type WorkflowViewerProps = {
   response: any;
@@ -54,6 +56,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="sm:text-lg text-md font-semibold">{workflow.routine_name}</h3>
+            <SourceValidationNotice status={workflow.source_validation} />
             <p className="text-sm text-gray-600">
               {workflow.status === 'running' && ' ⏳ Analysis in progress...'}
               {workflow.status === 'completed' && ' ✅ Analysis complete'}
@@ -77,7 +80,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
             className={`overflow-y-auto ${isCompleted ? 'max-h-[300px]' : 'max-h-[200px]'} space-y-3 border rounded-lg p-4 bg-white`}
             style={{ scrollbarWidth: 'thin' }}
           >
-            {visibleSteps.map((step, index) => (
+            {visibleSteps.map((step) => (
               <div key={step.id} className="border rounded-lg overflow-hidden">
                 <div
                   className="p-4 bg-white cursor-pointer hover:bg-gray-50 transition-colors"
@@ -97,11 +100,6 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {step.confidence && (
-                        <span className="text-sm text-gray-600">
-                          {(step.confidence * 100).toFixed(0)}%
-                        </span>
-                      )}
                       <StepStatusIcon status={step.status} />
                     </div>
                   </div>
@@ -109,6 +107,15 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
 
                 {isStepExpanded(step.id) && (
                   <div className="p-4 bg-gray-50 border-t">
+                    {coverageLabel(step.output_data) && (
+                      <p className="text-sm text-gray-600 mb-3">{coverageLabel(step.output_data)}</p>
+                    )}
+                    {claimRows(step.output_data).map((claim, idx) => (
+                      <div className="mb-3 text-sm text-gray-600" key={idx}>
+                        <p className="font-medium">{claim.label}</p>
+                        <p>{claim.text} {claim.citations}</p>
+                      </div>
+                    ))}
                     {step.reasoning && (
                       <div className="mb-4">
                         <h5 className="font-medium text-sm text-gray-700 mb-1">Reasoning</h5>
@@ -116,23 +123,25 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
                       </div>
                     )}
 
-                    {step.citations.length > 0 && (
+                    {evidenceSources(step.output_data, step.citations).length > 0 && (
                       <div className="space-y-2">
                         <h5 className="font-medium text-sm text-gray-700">Sources</h5>
-                        {step.citations.map((citation, idx) => (
+                        {evidenceSources(step.output_data, step.citations).map((citation, idx) => (
                           <div key={idx} className="bg-white p-3 rounded border">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="text-xs font-medium text-green-600">
-                                    {formatSourceName(citation.source)}
+                                    [{idx + 1}] {formatSourceName(citation.source)}
                                   </span>
                                 </div>
                                 <p className="text-sm text-gray-600">{citation.content}</p>
+                                {citation.sourceType && <p className="text-xs text-gray-500">{citation.sourceType.replaceAll('_', ' ')}</p>}
+                                {citation.page !== undefined && <p className="text-xs text-gray-500">PDF page index: {citation.page}</p>}
+                                {citation.evidenceId && <p className="text-xs text-gray-500 break-all">Citation ID: {citation.evidenceId}</p>}
+                                {citation.entryId && <p className="text-xs text-gray-500 break-all">Record: {citation.entryId}</p>}
+                                {citation.entryId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(citation.entryId) && <a className="text-sm text-blue-600 underline" href={`/journal/${citation.entryId}`}>Open source record</a>}
                               </div>
-                              <span className="text-xs text-gray-500 ml-2">
-                                {(citation.confidence * 100).toFixed(0)}%
-                              </span>
                             </div>
                           </div>
                         ))}
@@ -147,11 +156,7 @@ export const WorkflowViewer: React.FC<WorkflowViewerProps> = ({ response }) => {
           {/* Final Result */}
           {workflow.status === 'completed' && workflow.final_result && (
             <div className="mt-6 p-2 rounded-lg">
-              {workflow.overall_confidence && (
-                <div className="text-sm text-gray-600 mt-3">
-                  Confidence: {(workflow.overall_confidence * 100).toFixed(0)}%
-                </div>
-              )}
+              <p className="text-sm text-gray-600 mt-3">Confidence unavailable. Accuracy has not been measured. Interpretations are reflective hypotheses.</p>
             </div>
           )}
         </>
