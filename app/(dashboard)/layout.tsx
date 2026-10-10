@@ -7,9 +7,9 @@ import { AuthGate, useAuth } from '@/components/AuthProvider';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-type DashboardLayoutProps<T = {}> = {
+type DashboardLayoutProps = {
   children: React.ReactNode;
-} & T;
+};
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -22,6 +22,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { href: firstEntry ? `/journal/${firstEntry.id}` : '/journal', label: 'Journal' },
     { href: '/analysis', label: 'Analysis' },
     { href: '/history', label: 'Charts' },
+    { href: '/profile', label: 'Profile' },
     // { href: '/playlist', label: 'Playlist' },
     { href: '/settings', label: 'Settings' },
     { href: '/about', label: 'About' },
@@ -42,7 +43,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </header>
       <nav className="bg-white border-b border-black/10">
-        <ul className="flex sm:space-x-4 justify-center">
+        <ul className="flex flex-wrap sm:space-x-4 justify-center">
           {links.map((link) => (
             <li
               className="hover:bg-pink-300 sm:px-4 px-[8px] py-2 text-xs sm:text-base"

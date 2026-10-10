@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ReactDOM from 'react-dom';
 import BasicModal from './BasicModal';
+import { confirmSourceReset } from '@/lib/sourceResetGuard';
 
 type EntryCardProps = {
   entry: JournalEntry;
@@ -19,14 +20,15 @@ type EntryCardProps = {
 
 const EntryCard = ({ entry, href, onDelete }: EntryCardProps) => {
   const router = useRouter();
-  const handleDelete = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+  const handleDelete = async (e?: { preventDefault: () => void }) => {
+    e?.preventDefault();
+    if (!(await confirmSourceReset())) return;
     onDelete(entry.id);
   };
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
   const date = new Date(entry.created_at).toDateString();
-  const [dreamAnalysis, setDreamAnalysis] = useState<Partial<AnalysisData> | undefined>(
+  const [dreamAnalysis] = useState<Partial<AnalysisData> | undefined>(
     entry.analysis
   );
 

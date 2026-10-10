@@ -1,6 +1,7 @@
 'use client';
 
 import { generateDream } from '@/utils/api/clientApi';
+import { confirmSourceReset } from '@/lib/sourceResetGuard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -16,14 +17,15 @@ import { RootState } from '@/redux/rootReducer';
 import BasicModal from './BasicModal';
 import ReactDOM from 'react-dom';
 import FeedbackComponent from './FeedbackComponent';
+import { AnalysisData, JournalEntry } from '@/types';
 
-const Editor = ({ entry }: any) => {
+const Editor = ({ entry }: { entry: JournalEntry }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const [value, setValue] = useState(entry?.content);
+  const [value, setValue] = useState(entry.content);
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(entry?.analysis || {});
-  const [mood, setMood] = useState<EmotionType>('Joy');
+  const [analysis, setAnalysis] = useState<Partial<AnalysisData>>(entry.analysis || {});
+  const [mood] = useState<EmotionType>('Joy');
   const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
 
   const settings = useSelector((state: RootState) => state.settings);
@@ -37,7 +39,7 @@ const Editor = ({ entry }: any) => {
     negative,
   } = analysis || {};
 
-  const normalizeSymbolText = (symbols: any) => (Array.isArray(symbols) ? symbols.join(', ') : '');
+  const normalizeSymbolText = (symbols: unknown) => (Array.isArray(symbols) ? symbols.join(', ') : '');
 
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
@@ -47,7 +49,7 @@ const Editor = ({ entry }: any) => {
     if (!entries || entries.length === 0) {
       dispatch(fetchEntries({ pageSize: 100 }));
     }
-  }, [dispatch, entries?.length]);
+  }, [dispatch, entries]);
 
   const { currentIndex, prevEntry, nextEntry } = useMemo(() => {
     const idx = entries?.findIndex((e) => e.id === entry?.id) ?? -1;
@@ -68,6 +70,7 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleSave = async () => {
+    if (!(await confirmSourceReset())) return;
     try {
       setIsLoading(true);
       const data = await dispatch(
@@ -91,6 +94,7 @@ const Editor = ({ entry }: any) => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    if (!(await confirmSourceReset())) return;
     setIsLoading(true);
     const randomNumber = Math.floor(Math.random() * 100) + 1;
     const randomNumber2 = Math.floor(Math.random() * 100) + 1;
@@ -115,6 +119,7 @@ const Editor = ({ entry }: any) => {
   };
 
   const handleDelete = async () => {
+    if (!(await confirmSourceReset())) return;
     try {
       await deleteEntry(entry.id);
       router.push('/journal');
@@ -278,7 +283,7 @@ const Editor = ({ entry }: any) => {
 
             {/* Delete Button */}
             <div className="flex justify-center pt-4">
-              {analysis && (
+              {analysis.id && (
                 <>
                   <button
                     disabled={loading}
@@ -291,7 +296,7 @@ const Editor = ({ entry }: any) => {
                   {feedbackModal &&
                     ReactDOM.createPortal(
                       <FeedbackComponent
-                        analysisId={entry.analysis.id}
+                        analysisId={analysis.id}
                         analysisType={'analysis'}
                         feedbackModal={feedbackModal}
                         setFeedbackModal={setFeedbackModal}
