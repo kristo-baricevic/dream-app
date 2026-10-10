@@ -3,6 +3,8 @@
 import { RootState } from '@/redux/rootReducer';
 import { IconCloudFilled } from '@tabler/icons-react';
 import Link from 'next/link';
+import { AuthGate, useAuth } from '@/components/AuthProvider';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 type DashboardLayoutProps<T = {}> = {
@@ -10,12 +12,14 @@ type DashboardLayoutProps<T = {}> = {
 } & T;
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const { user, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState('');
   const firstEntry = useSelector((state: RootState) => state.journal.entries[0]);
 
   const links = [
     // { href: '/', label: 'Landing Page' },
     { href: '/journal', label: 'Home' },
-    { href: `/journal/${firstEntry?.id}`, label: 'Journal' },
+    { href: firstEntry ? `/journal/${firstEntry.id}` : '/journal', label: 'Journal' },
     { href: '/analysis', label: 'Analysis' },
     { href: '/history', label: 'Charts' },
     // { href: '/playlist', label: 'Playlist' },
@@ -24,7 +28,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-pink-100 background-main font-sans">
+    <AuthGate><div className="min-h-screen bg-pink-100 background-main font-sans">
       <header className="bg-white border-b border-black/10 sticky">
         <div className="bg-gradient-to-r from-pink-200 via-pink-300 to-pink-400 flex justify-between items-center min-w-screen mx-auto p-4 tw-w-full">
           <div className="flex flex-row">
@@ -34,7 +38,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <span className="font-mono ml-2 text-[20px]">Dream Analyzer</span>
             </h1>
           </div>
-          {/* <UserButton /> */}
+          <div className="flex items-center gap-3 text-sm"><span>{user?.username}</span><button onClick={() => { void logout().catch(() => setLogoutError('Sign out failed. Please retry.')); }} className="rounded-lg border border-white/70 px-3 py-2 hover:bg-white/40">Sign out</button></div>
         </div>
       </header>
       <nav className="bg-white border-b border-black/10">
@@ -51,8 +55,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </ul>
       </nav>
-      <main className="max-w-screen-xl mx-auto p-2">{children}</main>
-    </div>
+      <main className="max-w-screen-xl mx-auto p-2">{logoutError && <p role="alert">{logoutError}</p>}{children}</main>
+    </div></AuthGate>
   );
 };
 

@@ -1,3 +1,4 @@
+import { apiFetch } from '@/services/apiFetch';
 import { JournalEntry } from '@/types';
 import { EmotionType } from '../parameters/emotions';
 import { getPersonality } from '../parameters/personalities';
@@ -9,8 +10,8 @@ export const createURL = (path: string) => {
 
 const local = false;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL;
+const API_URL = '';
+const FAST_API_URL = '/fastapi';
 
 export const updatedEntry = async (
   id: string,
@@ -20,14 +21,14 @@ export const updatedEntry = async (
   settings: Settings,
 ) => {
   try {
-    const response = await fetch(
-      new Request(`${API_URL}/api/entries/${id}/update/`, {
+    const response = await apiFetch(
+      `${API_URL}/api/entries/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ content, mood, settings }),
-      })
+      }
     );
 
     if (response.ok) {
@@ -45,14 +46,14 @@ export const updatedEntry = async (
 };
 
 export const createNewEntry = async (content: string = 'New entry') => {
-  const res = await fetch(
-    new Request(`${API_URL}/api/entries/create/`, {
+  const res = await apiFetch(
+    `${API_URL}/api/entries/create/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ content }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -66,10 +67,10 @@ export const createNewEntry = async (content: string = 'New entry') => {
 
 export const deleteEntry = async (id: string) => {
   try {
-    const res = await fetch(
-      new Request(`${API_URL}/api/entries/${id}/delete/`, {
+    const res = await apiFetch(
+      `${API_URL}/api/entries/${id}/delete/`, {
         method: 'DELETE',
-      })
+      }
     );
 
     if (res.ok) {
@@ -93,8 +94,8 @@ export const askQuestion = async (
   const personalityPrompt = getPersonality(settings.doctorPersonality);
   const URL = local ? `${FAST_API_URL}/qa` : `${API_URL}/fastapi/qa`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ export const askQuestion = async (
         personality: personalityPrompt,
         settings: settings,
       }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -120,14 +121,14 @@ export const askQuestion = async (
 export const generateDream = async (question: string) => {
   const URL = local ? `${FAST_API_URL}/generate-dream` : `${API_URL}/fastapi/generate-dream`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ theme: question }),
-    })
+    }
   );
 
   if (res.ok) {
@@ -144,8 +145,8 @@ export const askCustomQuestion = async (
   const personalityPrompt = getPersonality(settings.doctorPersonality);
   const URL = local ? `${FAST_API_URL}/custom-question` : `${API_URL}/fastapi/custom-question`;
 
-  const res = await fetch(
-    new Request(URL, {
+  const res = await apiFetch(
+    URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ export const askCustomQuestion = async (
         personality: personalityPrompt,
         settings: settings
       }),
-    })
+    }
   );
 
   if (res.ok) {

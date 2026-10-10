@@ -1,3 +1,4 @@
+import { apiFetch } from '@/services/apiFetch';
 import { IconSend, IconThumbDown, IconThumbUp } from '@tabler/icons-react';
 import React, { useState } from 'react';
 
@@ -14,13 +15,13 @@ const FeedbackWidget = ({ analysisId, analysisType, feedbackModal, setFeedbackMo
     relevance: null,
     helpful: null,
   });
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = '';
 
   const [submitted, setSubmitted] = useState(false);
 
   const submitFeedback = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/feedback/submit/`, {
+      const response = await apiFetch(`${API_URL}/api/feedback/submit/`, {
         credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

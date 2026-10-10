@@ -16,7 +16,7 @@ export default function PlaylistPage() {
     if (entries.length > 1) collectSongs(entries, dispatch);
   }, [entries]);
 
-  const userId = 3333;
+  const userId = true;
 
   useEffect(() => {
     if (userId) {

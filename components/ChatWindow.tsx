@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/services/apiFetch';
 
 import useIsMobile from '@/utils/isMobile';
 import { useState, useRef, useEffect } from 'react';
@@ -24,9 +25,9 @@ type UIEvent =
   | { type: 'dream_staged'; payload: { dream_id: string; staged: boolean } }
   | { type: 'refresh'; payload: { scope: string; reason?: string } };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = '';
 
-const CHAT_API_URL = process.env.NEXT_PUBLIC_CHAT_API_URL;
+const CHAT_API_URL = '/chat';
 const local = false;
 
 export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
@@ -89,7 +90,7 @@ export default function ChatWindow({ isOpen, setIsOpen }: ChatWindowProps) {
 
     try {
       const URL = local ? `${CHAT_API_URL}/message` : `${API_URL}/chat/message`;
-      const response = await fetch(URL, {
+      const response = await apiFetch(URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

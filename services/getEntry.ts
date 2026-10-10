@@ -1,7 +1,8 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { serverFetch } from '@/services/serverFetch';
+const API_URL = '';
 
 export const getEntry = async (id: string) => {
-  const res = await fetch(`${API_URL}/api/entries/${id}/`, {
+  const res = await serverFetch(`${API_URL}/api/entries/${id}/`, {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to fetch entry');

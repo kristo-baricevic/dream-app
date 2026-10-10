@@ -1,4 +1,5 @@
 'use client';
+import { apiFetch } from '@/services/apiFetch';
 import { useEffect, useState } from 'react';
 import HistoryChart from '@/components/HistoryChart';
 import RadarChart from '@/components/RadarChart';
@@ -36,7 +37,7 @@ const History = () => {
     let isMounted = true;
     (async () => {
       try {
-        const res = await fetch('/api/history', { cache: 'no-store' });
+        const res = await apiFetch('/api/data/', { cache: 'no-store' });
         const json = await res.json();
         if (isMounted) {
           setAnalyses(json.analyses || []);

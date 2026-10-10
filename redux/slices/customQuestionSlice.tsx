@@ -1,3 +1,4 @@
+import { apiFetch } from '@/services/apiFetch';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { CustomQuestionData } from '@/types';
 
@@ -10,8 +11,8 @@ type CustomQuestionState = {
   previous: string | null;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const FAST_API_URL = process.env.NEXT_PUBLIC_FAST_API_URL as string;
+const API_URL = '';
+const FAST_API_URL = '/fastapi';
 
 type PaginatedResponse = {
   count: number;
@@ -39,8 +40,8 @@ const initialState: CustomQuestionState = {
 };
 
 const entriesUrlFrom = (nextUrl: string) => {
-  const u = new URL(nextUrl, API_URL);
-  return `${API_URL}/api/entries/?${u.searchParams.toString()}`;
+  const u = new URL(nextUrl, 'http://localhost');
+  return `${API_URL}/api/custom-questions/?${u.searchParams.toString()}`;
 };
 
 export const fetchAllCustomQuestions = createAsyncThunk<PaginatedResponse, SearchParams>(
@@ -56,7 +57,7 @@ export const fetchAllCustomQuestions = createAsyncThunk<PaginatedResponse, Searc
       ),
     });
 
-    const res = await fetch(`${API_URL}/api/custom-questions/?${query.toString()}`, {
+    const res = await apiFetch(`${API_URL}/api/custom-questions/?${query.toString()}`, {
       credentials: 'include',
     });
 

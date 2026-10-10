@@ -1,3 +1,4 @@
+import { apiFetch } from '@/services/apiFetch';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 export type SymbolCount = { symbol: string; count: number };
@@ -8,7 +9,7 @@ type ChartsPageData = {
   error: string | null;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = '';
 
 const initialState: ChartsPageData = {
   symbols: [],
@@ -19,7 +20,7 @@ const initialState: ChartsPageData = {
 export const fetchAllSymbols = createAsyncThunk<SymbolCount[]>(
   'charts/fetchAllSymbols',
   async () => {
-    const res = await fetch(`${API_URL}/api/symbols/`, { credentials: 'include' });
+    const res = await apiFetch(`${API_URL}/api/symbols/`, { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to fetch symbols');
     return res.json();
   }
