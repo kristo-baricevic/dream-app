@@ -9,12 +9,13 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ReactDOM from 'react-dom';
 import BasicModal from './BasicModal';
-import { confirmSourceReset } from '@/lib/sourceResetGuard';
+import SourceValidationNotice from './SourceValidationNotice';
+import { captureSourceReset, SourceResetTicket } from '@/lib/sourceResetGuard';
 
 type EntryCardProps = {
   entry: JournalEntry;
   href: string;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, ticket: SourceResetTicket) => void;
   analysis: AnalysisData;
 };
 
@@ -22,8 +23,9 @@ const EntryCard = ({ entry, href, onDelete }: EntryCardProps) => {
   const router = useRouter();
   const handleDelete = async (e?: { preventDefault: () => void }) => {
     e?.preventDefault();
-    if (!(await confirmSourceReset())) return;
-    onDelete(entry.id);
+    const ticket = await captureSourceReset(entry.source_preimage, 'delete');
+    if (!ticket) return;
+    onDelete(entry.id, ticket);
   };
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
@@ -38,6 +40,7 @@ const EntryCard = ({ entry, href, onDelete }: EntryCardProps) => {
     <div className="cloud border border-style border-black" style={cloudStyle}>
       <div className="ml-10 flex flex-col">
         <div className="px-4 font-serif">{date}</div>
+        <SourceValidationNotice status={dreamAnalysis?.source_validation} />
         <div className="px-4 content-truncate font-bold">{dreamAnalysis?.subject}</div>
         <div className="px-4 content-truncate font-serif">{dreamAnalysis?.summary}</div>
         <div

@@ -14,7 +14,7 @@ export async function proxy(request: NextRequest, path: string[], service: 'api'
     return Response.json({ detail: 'Invalid API path.' }, { status: 400 });
   }
   const headers = new Headers();
-  for (const name of ['cookie', 'x-csrftoken', 'origin', 'referer', 'host', 'content-type']) {
+  for (const name of ['cookie', 'x-csrftoken', 'origin', 'referer', 'host', 'content-type', 'x-dream-principal', 'x-dream-session']) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }
@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest, path: string[], service: 'api'
     const upstream = await fetch(url, { method: request.method, headers, body,
       cache: 'no-store', redirect: 'manual', signal: request.signal });
     const outgoing = new Headers({ 'Cache-Control': 'no-store, private', 'Vary': 'Cookie' });
-    for (const name of ['content-type', 'retry-after']) {
+    for (const name of ['content-type', 'retry-after', 'x-dream-principal']) {
       const value = upstream.headers.get(name);
       if (value) outgoing.set(name, value);
     }

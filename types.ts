@@ -5,12 +5,15 @@ export type JournalEntry = {
   created_at: Date;
   updated_at: Date;
   content: string;
+  source_preimage: { entry_id: string; content_hash: string; updated_at: string };
+  analysis_status?: string;
   analysis?: 
     AnalysisData
   ;
 };
 
 export type AnalysisData = {
+  source_validation?: 'current' | 'historical_unvalidated';
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -38,6 +41,7 @@ export type Symbols = {
 }
 
 export type CumulativeAnalysisData = {
+  source_validation?: 'current' | 'historical_unvalidated';
   id: string;
   created_at: Date;
   updated_at: Date;
@@ -52,6 +56,7 @@ export type CumulativeAnalysisData = {
 };
 
 export type CustomQuestionData = {
+  source_validation?: 'current' | 'historical_unvalidated';
   id: string;
   created_at: Date;
   updated_at: Date;

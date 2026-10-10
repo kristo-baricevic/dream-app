@@ -6,7 +6,7 @@ const API_BASE_URL = '';
 export interface Citation {
   source: string;
   content: string;
-  confidence: number;
+  confidence?: number | null;
   reference?: string;
 }
 
@@ -18,12 +18,14 @@ export interface WorkflowStep {
   status: 'pending' | 'running' | 'completed' | 'failed';
   duration_ms?: number;
   confidence?: number;
+  output_data?: unknown;
   reasoning?: string;
   model_used?: string;
   citations: Citation[];
 }
 
 export interface WorkflowExecution {
+  source_validation?: 'current' | 'historical_unvalidated';
   id: string;
   workflow_type: string;
   routine_name: string;

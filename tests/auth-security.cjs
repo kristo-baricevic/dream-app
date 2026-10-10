@@ -61,6 +61,7 @@ test('client adds CSRF and discards delayed private JSON after session change', 
       response.json = () => new Promise((resolve) => { resolveJson = resolve; });
       return response;
     } });
+  api.setRequestPrincipal({ user: { id: 'synthetic-a' }, loginDeadline: '2026-10-10T12:00:00Z' });
   const response = await api.apiFetch('/api/entries/create/', { method: 'POST' });
   assert.equal(observed.headers.get('X-CSRFToken'), 'synthetic-csrf');
   assert.equal(observed.credentials, 'same-origin'); assert.equal(observed.cache, 'no-store');
@@ -73,6 +74,7 @@ test('unauthenticated private response invalidates, while bad credentials keep l
   const { api } = load('services/apiFetch.ts', { window: { dispatchEvent() { events++; } }, Event,
     fetch: async (url) => url === '/api/auth/csrf/' ? Response.json({ csrfToken: 'synthetic-csrf' }) : new Response('', { status: 401 }) });
   await api.apiFetch('/api/auth/login/', { method: 'POST' }); assert.equal(events, 0);
+  api.setRequestPrincipal({ user: { id: 'synthetic-a' }, loginDeadline: '2026-10-10T12:00:00Z' });
   await api.apiFetch('/api/entries/'); assert.equal(events, 1);
 });
 
@@ -85,4 +87,61 @@ test('login renders existing cloud/pink style with labelled password and no popu
   assert.match(html, /bg-gradient-to-r from-pink-200/); assert.match(html, /type="password"/);
   assert.match(html, /autoComplete="username"/); assert.match(html, /Welcome back/);
   assert.doesNotMatch(html, /value="admin"/);
+});
+
+test('source ticket binds displayed preimage and operation, rejecting a session change during confirmation', async () => {
+  let generation = 0; let switched = false;
+  const session = { user: { id: 'synthetic-owner' }, loginDeadline: '2026-10-10T12:00:00Z' };
+  const preimage = { entry_id: 'synthetic-entry', content_hash: 'a'.repeat(64), updated_at: '2026-10-10T10:00:00Z' };
+  const revision = { source: 1, privacy: 2, review: 3 };
+  const { api } = load('lib/sourceResetGuard.ts', { window: { alert() {}, confirm() { if (switched) generation++; return true; } } }, {
+    './longitudinal': { auditRequest: async path => path.includes('source-reset') ? { revision, enabled: true } : session },
+    '@/services/apiFetch': { privateRequestGeneration: () => generation },
+  });
+  const ticket = await api.captureSourceReset(preimage, 'update');
+  assert.equal(ticket.expected_source.entry_id, 'synthetic-entry');
+  assert.equal(ticket.expected_source.content_hash, preimage.content_hash);
+  assert.equal(ticket.expected_operation, 'update');
+  assert.equal(ticket.expected_session, session.loginDeadline);
+  switched = true;
+  assert.equal(await api.captureSourceReset(preimage, 'delete'), null);
+  assert.equal(await api.captureSourceReset(undefined, 'update'), null);
+});
+
+test('both proxy directions preserve the reject-only principal header', async () => {
+  let forwarded;
+  const { api } = load('services/serverProxy.ts', { process: { env: { DREAM_DJANGO_URL: 'https://django.example' } },
+    fetch: async (_, init) => { forwarded = init.headers.get('x-dream-principal'); return Response.json({}, { headers: { 'X-Dream-Principal': 'synthetic-owner' } }); } });
+  const request = { headers: new Headers({ 'X-Dream-Principal': 'synthetic-owner' }), method: 'GET',
+    nextUrl: new URL('https://browser.example/api/longitudinal/profile'), signal: new AbortController().signal };
+  const response = await api.proxy(request, ['longitudinal', 'profile'], 'api');
+  assert.equal(forwarded, 'synthetic-owner');
+  assert.equal(response.headers.get('X-Dream-Principal'), 'synthetic-owner');
+});
+
+test('private input stays bound to the accepted account across a switched cookie', async () => {
+  let observed;
+  const { api } = load('services/apiFetch.ts', { window: { dispatchEvent() {} }, Event,
+    fetch: async (url, init) => {
+      if (url === '/api/auth/csrf/') return Response.json({ csrfToken: 'synthetic' });
+      observed = init;
+      // Synthetic server currently has account B's cookie and rejects A's hints.
+      return new Response('', { status: 403 });
+    } });
+  await assert.rejects(api.apiFetch('/api/entries/create/', { method: 'POST' }), e => e.name === 'AbortError');
+  api.setRequestPrincipal({ user: { id: 'synthetic-a' }, loginDeadline: '2026-10-10T12:00:00Z' });
+  const response = await api.apiFetch('/api/entries/create/', { method: 'POST', body: 'synthetic account-A draft' });
+  assert.equal(response.status, 403);
+  assert.equal(observed.headers.get('X-Dream-Principal'), 'synthetic-a');
+  assert.equal(observed.headers.get('X-Dream-Session'), '2026-10-10T12:00:00Z');
+  api.clearPrivateRequests();
+  await assert.rejects(api.apiFetch('/api/entries/'), e => e.name === 'AbortError');
+});
+
+test('historical provenance is visible without implying current grounding', () => {
+  const React = require('react'); const render = require('react-dom/server').renderToStaticMarkup;
+  const { api } = load('components/SourceValidationNotice.tsx');
+  assert.match(render(React.createElement(api.default, { status: 'historical_unvalidated' })), /Historical interpretation/);
+  assert.match(render(React.createElement(api.default, { status: 'historical_unvalidated' })), /have not been validated/);
+  assert.equal(render(React.createElement(api.default, { status: 'current' })), '');
 });

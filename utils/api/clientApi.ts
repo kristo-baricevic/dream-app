@@ -1,4 +1,5 @@
 import { apiFetch } from '@/services/apiFetch';
+import { captureSourceReset, SourceResetTicket, sourceMutationFields } from '@/lib/sourceResetGuard';
 import { JournalEntry } from '@/types';
 import { EmotionType } from '../parameters/emotions';
 import { getPersonality } from '../parameters/personalities';
@@ -19,15 +20,19 @@ export const updatedEntry = async (
   // personality: string,
   mood: EmotionType,
   settings: Settings,
+  preimage?: JournalEntry['source_preimage'],
 ) => {
+  const ticket = await captureSourceReset(preimage, 'update');
+  if (!ticket) throw new Error('Source update cancelled.');
   try {
     const response = await apiFetch(
       `${API_URL}/api/entries/${id}/update/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'X-Dream-Principal': ticket.expected_principal,
         },
-        body: JSON.stringify({ content, mood, settings }),
+        body: JSON.stringify({ content, mood, settings, ...sourceMutationFields(ticket), source_origin: 'unknown' }),
       }
     );
 
@@ -65,11 +70,13 @@ export const createNewEntry = async (content: string = 'New entry') => {
   }
 };
 
-export const deleteEntry = async (id: string) => {
+export const deleteEntry = async (id: string, ticket: SourceResetTicket) => {
   try {
     const res = await apiFetch(
       `${API_URL}/api/entries/${id}/delete/`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'X-Dream-Principal': ticket.expected_principal },
+        body: JSON.stringify(sourceMutationFields(ticket)),
       }
     );
 

@@ -35,9 +35,9 @@ const DreamMain: React.FC = () => {
     }
   };
 
-  const handleDeleteEntry = async (id: string) => {
+  const handleDeleteEntry = async (id: string, ticket: import('@/lib/sourceResetGuard').SourceResetTicket) => {
     try {
-      dispatch(deleteEntryThunk(id));
+      await dispatch(deleteEntryThunk({ id, ticket })).unwrap();
     } catch (error) {
       console.error('Failed to delete entry:', error);
     }

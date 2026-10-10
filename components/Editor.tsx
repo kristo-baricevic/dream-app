@@ -1,7 +1,8 @@
 'use client';
+import SourceValidationNotice from './SourceValidationNotice';
 
 import { generateDream } from '@/utils/api/clientApi';
-import { confirmSourceReset } from '@/lib/sourceResetGuard';
+import { captureSourceReset, confirmSourceReset } from '@/lib/sourceResetGuard';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -23,8 +24,10 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [value, setValue] = useState(entry.content);
+  const [sourceOrigin, setSourceOrigin] = useState<'unknown' | 'synthetic'>('unknown');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Partial<AnalysisData>>(entry.analysis || {});
+  const [sourcePreimage, setSourcePreimage] = useState(entry.source_preimage);
   const [mood] = useState<EmotionType>('Joy');
   const [feedbackModal, setFeedbackModal] = useState<boolean>(false);
 
@@ -70,7 +73,8 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
   };
 
   const handleSave = async () => {
-    if (!(await confirmSourceReset())) return;
+    const ticket = await captureSourceReset(sourcePreimage, 'update');
+    if (!ticket) return;
     try {
       setIsLoading(true);
       const data = await dispatch(
@@ -79,12 +83,13 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
           content: value,
           mood,
           settings,
+          ticket,
+          source_origin: sourceOrigin,
         })
       ).unwrap();
 
-      if (data && data.analysis) {
-        setAnalysis(data.analysis);
-      }
+      setSourcePreimage(data.source_preimage);
+      setAnalysis(data.analysis || {});
     } catch (error) {
       console.error('Failed to save entry:', error);
     } finally {
@@ -110,6 +115,7 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
     try {
       const res = await generateDream(prompt);
       setValue(res);
+      setSourceOrigin('synthetic');
     } catch (error) {
       console.error('Failed to generate dream:', error);
       setValue('There has been an error!');
@@ -119,9 +125,10 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
   };
 
   const handleDelete = async () => {
-    if (!(await confirmSourceReset())) return;
+    const ticket = await captureSourceReset(sourcePreimage, 'delete');
+    if (!ticket) return;
     try {
-      await deleteEntry(entry.id);
+      await deleteEntry(entry.id, ticket);
       router.push('/journal');
     } catch (error) {
       console.error('Failed to delete entry:', error);
@@ -211,7 +218,7 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
               <textarea
                 className="w-full h-[350px] px-4 py-3 bg-slate-50 text-base resize-none border-2 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => { setValue(e.target.value); setSourceOrigin('unknown'); }}
                 placeholder="Write or generate your dream here..."
               />
             </div>
@@ -220,6 +227,7 @@ const Editor = ({ entry }: { entry: JournalEntry }) => {
             {analysis && Object.keys(analysis).length > 0 && (
               <div className="space-y-4 pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900">Dream Analysis</h3>
+                <SourceValidationNotice status={analysis.source_validation} />
 
                 <div className="grid grid-cols-2 gap-4">
                   {/* Color Analysis */}

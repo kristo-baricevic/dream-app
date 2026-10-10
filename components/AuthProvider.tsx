@@ -2,11 +2,11 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { makeStore } from '@/redux/store';
-import { apiFetch, clearPrivateRequests } from '@/services/apiFetch';
+import { apiFetch, clearPrivateRequests, setRequestPrincipal } from '@/services/apiFetch';
 import { usePathname, useRouter } from 'next/navigation';
 
 type User = { id: string; username: string; isAdmin: boolean };
-type Identity = { user: User; loginDeadline: string };
+type Identity = { user: User; loginDeadline: string; contextFence?: unknown };
 const Auth = createContext<{ user: User | null; loading: boolean; login: (username: string, password: string) => Promise<void>; logout: () => Promise<void> } | null>(null);
 export const useAuth = () => { const context = useContext(Auth); if (!context) throw new Error('Authentication provider required'); return context; };
 
@@ -18,9 +18,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const identityRef = useRef<Identity | null>(null);
   const transitioning = useRef(false);
   const channel = useRef<BroadcastChannel | null>(null);
+  const privateChannel = useRef<BroadcastChannel | null>(null);
   const replace = (next: Identity | null) => {
     version.current += 1;
     clearPrivateRequests();
+    setRequestPrincipal(next);
     identityRef.current = next;
     setIdentity(next); setStore(makeStore()); setLoading(false);
   };
@@ -33,17 +35,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const response = await apiFetch('/api/auth/session/');
         const data = response.ok ? await response.json() : null;
         if (!active || accepted !== version.current) return;
-        setIdentity((prior) => {
-          if (prior?.user.id !== data?.user.id || prior?.loginDeadline !== data?.loginDeadline) {
-            clearPrivateRequests(); setStore(makeStore());
-            if (prior && data && prior.user.id !== data.user.id) {
-              window.location.replace('/journal');
-              return null;
-            }
+        const priorFence = identityRef.current;
+        if (priorFence && data && priorFence.user.id === data.user.id &&
+            JSON.stringify(priorFence.contextFence) !== JSON.stringify(data.contextFence)) {
+          clearPrivateRequests(); setStore(makeStore());
+          window.location.reload();
+          return;
+        }
+        const prior = identityRef.current;
+        if (prior?.user.id !== data?.user.id || prior?.loginDeadline !== data?.loginDeadline) {
+          clearPrivateRequests(); setStore(makeStore());
+          if (prior && data && prior.user.id !== data.user.id) {
+            identityRef.current = null; setIdentity(null); setLoading(true);
+            window.location.replace('/journal');
+            return;
           }
-          identityRef.current = data;
-          return data;
-        });
+        }
+        setRequestPrincipal(data);
+        identityRef.current = data;
+        setIdentity(data);
         setLoading(false);
       } catch { if (active && accepted === version.current) replace(null); }
     };
@@ -54,12 +64,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     channel.current = new BroadcastChannel('dream-auth');
     channel.current.onmessage = () => { replace(null); window.location.replace('/journal'); };
+    const dataChanged = () => {
+      version.current += 1;
+      clearPrivateRequests(); setLoading(true);
+      privateChannel.current?.postMessage('changed');
+      void refresh();
+    };
+    privateChannel.current = new BroadcastChannel('dream-private-data');
+    privateChannel.current.onmessage = () => {
+      version.current += 1;
+      clearPrivateRequests(); setLoading(true);
+      void refresh();
+    };
     window.addEventListener('dream-session-invalid', invalidate);
     window.addEventListener('focus', refresh);
+    window.addEventListener('dream-private-data-changed', dataChanged);
     void refresh();
     const timer = setInterval(refresh, 30000);
-    return () => { active = false; clearInterval(timer); channel.current?.close();
-      window.removeEventListener('dream-session-invalid', invalidate); window.removeEventListener('focus', refresh); };
+    return () => { active = false; clearInterval(timer); channel.current?.close(); privateChannel.current?.close();
+      window.removeEventListener('dream-session-invalid', invalidate); window.removeEventListener('focus', refresh);
+      window.removeEventListener('dream-private-data-changed', dataChanged); };
   }, []);
   useEffect(() => {
     if (!identity) return;
@@ -88,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally { transitioning.current = false; }
   };
   return <Auth.Provider value={{ user: identity?.user || null, loading, login, logout }}>
-    <Provider key={identity?.user.id || 'anonymous'} store={store}>{children}</Provider>
+    <Provider key={identity ? `${identity.user.id}:${identity.loginDeadline}` : 'anonymous'} store={store}>{children}</Provider>
   </Auth.Provider>;
 }
 
